@@ -3,6 +3,7 @@ package kakao_tech_bootcamp.community.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import kakao_tech_bootcamp.community.entity.Member;
 import org.springframework.stereotype.Repository;
 
@@ -12,16 +13,16 @@ public class MemberRepository {
     EntityManager em;
 
     public boolean existsEmail(String email) {
-        Query query = em.createQuery("select count(m) from member m where m.email = :email")
-                .setParameter("email", email);
-        int count = (int) query.getSingleResult();
+        Long count= em.createQuery("select count(m) from Member m where m.email = :email", Long.class)
+                .setParameter("email", email)
+                .getSingleResult();
         return count > 0;
     }
 
     public boolean existsNickname(String nickname) {
-        Query query = em.createQuery("select count(m) from member m where nickname = :nickname")
-                .setParameter("nickname", nickname);
-        int count = (int) query.getSingleResult();
+        Long count = em.createQuery("select count(m) from Member m where nickname = :nickname", Long.class)
+                .setParameter("nickname", nickname)
+                .getSingleResult();
         return count > 0;
     }
 
