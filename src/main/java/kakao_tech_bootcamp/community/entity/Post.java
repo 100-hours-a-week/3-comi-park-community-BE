@@ -39,7 +39,7 @@ public class Post {
     @ColumnDefault("false")
     private boolean isDeleted;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 

@@ -19,7 +19,7 @@ public class MemberPostLike {
     @EmbeddedId
     private MemberPostLikeId memberPostLikeId;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 
