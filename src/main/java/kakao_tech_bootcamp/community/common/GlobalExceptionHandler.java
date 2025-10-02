@@ -30,16 +30,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = ForbiddenException.class)
     public ResponseEntity<ApiResponse> forbiddenException(ForbiddenException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("not_authorized", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>("not_authorized", e.getMessage()));
     }
 
     @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<ApiResponse> notFoundException(NotFoundException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("not_found", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("not_found", e.getMessage()));
     }
 
     @ExceptionHandler(value = ConflictException.class)
     public ResponseEntity<ApiResponse> conflictException(ConflictException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("conflict_request", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("conflict_request", e.getMessage()));
     }
 }
