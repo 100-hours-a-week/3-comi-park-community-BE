@@ -23,13 +23,13 @@ public class MemberController {
 
     @PostMapping("/availability/email")
     public ResponseEntity<ApiResponse> isAvailableEmail(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
-        memberService.existsEmail(memberAvailabilityDto);
+        memberService.existsByEmail(memberAvailabilityDto);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", null));
     }
 
     @PostMapping("/availability/nickname")
     public ResponseEntity<ApiResponse> isAvailableNickname(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
-        memberService.existsNickname(memberAvailabilityDto);
+        memberService.existsByNickname(memberAvailabilityDto);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", null));
     }
 

@@ -23,29 +23,31 @@ public class MemberService {
     }
 
     @Transactional
-    public void existsEmail(MemberAvailabilityDto memberAvailabilityDto) {
-        boolean exists = memberRepository.existsEmail(memberAvailabilityDto.getEmail());
-
-        if (exists) {
+    public void existsByEmail(MemberAvailabilityDto memberAvailabilityDto) {
+        if (memberRepository.existsByEmail(memberAvailabilityDto.getEmail())) {
             throw new ConflictException("중복된 이메일입니다");
         }
     }
 
     @Transactional
-    public void existsNickname(MemberAvailabilityDto memberAvailabilityDto) {
-        boolean exists = memberRepository.existsNickname(memberAvailabilityDto.getNickname());
-
-        if (exists) {
+    public void existsByNickname(MemberAvailabilityDto memberAvailabilityDto) {
+        if (memberRepository.existsByNickname(memberAvailabilityDto.getNickname())) {
             throw new ConflictException("중복된 닉네임입니다");
         }
     }
 
     @Transactional
     public void saveMember(MemberCreateRequestDto dto) {
-        if (dto.getPassword() != null) {
-            if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
-                throw new BadRequestException("비밀번호가 일치하지 않습니다");
-            }
+        if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
+            throw new BadRequestException("비밀번호가 일치하지 않습니다");
+        }
+
+        if (memberRepository.existsByEmail(dto.getEmail())) {
+            throw new ConflictException("중복된 이메일입니다");
+        }
+
+        if (memberRepository.existsByNickname(dto.getNickname())) {
+            throw new ConflictException("중복된 닉네임입니다");
         }
 
         // TODO: 비밀번호 암호화
@@ -56,11 +58,7 @@ public class MemberService {
 
     @Transactional
     public MemberResponseDto findMember(Integer id) {
-        Member member = memberRepository.findBy(id);
-
-        if (member == null) {
-            throw new NotFoundException("회원을 찾을 수 없습니다");
-        }
+        Member member = memberRepository.findById(id).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
         MemberResponseDto memberResponseDto = new MemberResponseDto();
         memberResponseDto.setId(member.getId());
@@ -74,11 +72,8 @@ public class MemberService {
 
     @Transactional
     public void modifyMember(Integer id, MemberUpdateRequestDto dto) {
-        Member member = memberRepository.findBy(id);
-
-        if (member == null) {
-            throw new NotFoundException("회원을 찾을 수 없습니다");
-        }
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
         if (dto.getNickname() != null) {
             member.setNickname(dto.getNickname());
@@ -99,12 +94,8 @@ public class MemberService {
 
     @Transactional
     public void removeMember(Integer id) {
-        Member member = memberRepository.findBy(id);
-
-        if (member == null) {
-            throw new NotFoundException("회원을 찾을 수 없습니다");
-        }
-
-        memberRepository.remove(member);
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+        memberRepository.delete(member);
     }
 }
