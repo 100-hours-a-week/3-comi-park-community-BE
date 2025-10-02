@@ -11,15 +11,18 @@ import kakao_tech_bootcamp.community.dto.MemberUpdateRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -50,9 +53,9 @@ public class MemberService {
             throw new ConflictException("중복된 닉네임입니다");
         }
 
-        // TODO: 비밀번호 암호화
+        String encoded = passwordEncoder.encode(dto.getPassword());
+        Member member = new Member(dto.getEmail(), encoded, dto.getNickname(), dto.getImage());
 
-        Member member = new Member(dto.getEmail(), dto.getPassword(), dto.getNickname(), dto.getImage());
         memberRepository.save(member);
     }
 
