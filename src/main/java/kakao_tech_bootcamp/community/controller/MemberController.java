@@ -1,7 +1,9 @@
 package kakao_tech_bootcamp.community.controller;
 
 import kakao_tech_bootcamp.community.common.ApiResponse;
+import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.*;
+import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,14 +48,16 @@ public class MemberController {
     }
 
     @PatchMapping("/{memberId}")
-    public ResponseEntity modifyMember(@PathVariable Integer memberId, @RequestBody @Validated MemberUpdateRequestDto updateMemberRequestDto) {
-        memberService.modifyMember(memberId, updateMemberRequestDto);
+    public ResponseEntity modifyMember(@CurrentMember AuthInfo authInfo,
+                                       @PathVariable Integer memberId,
+                                       @RequestBody @Validated MemberUpdateRequestDto updateMemberRequestDto) {
+        memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity removeMember(@PathVariable Integer memberId) {
-        memberService.removeMember(memberId);
+    public ResponseEntity removeMember(@CurrentMember AuthInfo authInfo, @PathVariable Integer memberId) {
+        memberService.removeMember(authInfo.getId(), memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

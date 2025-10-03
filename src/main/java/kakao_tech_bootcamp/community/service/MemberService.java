@@ -1,8 +1,8 @@
 package kakao_tech_bootcamp.community.service;
 
-import jakarta.transaction.Transactional;
 import kakao_tech_bootcamp.community.common.exceptions.BadRequestException;
 import kakao_tech_bootcamp.community.common.exceptions.ConflictException;
+import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.dto.MemberAvailabilityDto;
 import kakao_tech_bootcamp.community.dto.MemberCreateRequestDto;
@@ -13,8 +13,10 @@ import kakao_tech_bootcamp.community.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -25,21 +27,20 @@ public class MemberService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void existsByEmail(MemberAvailabilityDto memberAvailabilityDto) {
         if (memberRepository.existsByEmail(memberAvailabilityDto.getEmail())) {
             throw new ConflictException("중복된 이메일입니다");
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void existsByNickname(MemberAvailabilityDto memberAvailabilityDto) {
         if (memberRepository.existsByNickname(memberAvailabilityDto.getNickname())) {
             throw new ConflictException("중복된 닉네임입니다");
         }
     }
 
-    @Transactional
     public void saveMember(MemberCreateRequestDto dto) {
         if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
             throw new BadRequestException("비밀번호가 일치하지 않습니다");
@@ -59,7 +60,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public MemberResponseDto findMember(Integer id) {
         Member member = memberRepository.findById(id).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -73,8 +74,11 @@ public class MemberService {
         return memberResponseDto;
     }
 
-    @Transactional
-    public void modifyMember(Integer id, MemberUpdateRequestDto dto) {
+    public void modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
+        if (currentMemberId != id) {
+            throw new ForbiddenException("회원 본인 정보에 대해서만 수정할 수 있습니다");
+        }
+
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -87,7 +91,7 @@ public class MemberService {
                 throw new BadRequestException("비밀번호가 일치하지 않습니다");
             }
 
-            member.setPassword(dto.getPassword());
+            member.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         if (dto.getImage() != null) {
@@ -95,8 +99,11 @@ public class MemberService {
         }
     }
 
-    @Transactional
-    public void removeMember(Integer id) {
+    public void removeMember(Integer currentMemberId, Integer id) {
+        if (currentMemberId != id) {
+            throw new ForbiddenException("회원 본인만 탈퇴할 수 있습니다");
+        }
+
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
         memberRepository.delete(member);
