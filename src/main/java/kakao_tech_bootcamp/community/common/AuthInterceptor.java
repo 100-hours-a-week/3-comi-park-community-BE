@@ -9,10 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
+    private static final Map<String, String> PUBLIC_ENDPOINT = Map.of(
+            "/auth", "POST",
+            "/members", "POST",
+            "/members/availability/email", "POST",
+            "/members/availability/nickname", "POST"
+    );
     private final AuthStrategy authStrategy;
 
     @Autowired
@@ -22,8 +29,11 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if ("/auth".equals(request.getRequestURI()) && "POST".equals(request.getMethod())) {
-            return true; // 로그인 요청만 공개 API
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
+
+        if (PUBLIC_ENDPOINT.containsKey(uri) && PUBLIC_ENDPOINT.get(uri).equals(method)) {
+            return true;
         }
 
         String credential = findCredential(request)
