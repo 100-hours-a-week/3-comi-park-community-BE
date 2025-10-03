@@ -41,6 +41,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
 
         AuthInfo authInfo = authStrategy.validate(credential);
+        request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;
     }
