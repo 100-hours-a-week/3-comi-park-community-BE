@@ -19,7 +19,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())  // REST API 서버이므로 CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // TODO: 개발 편의상 모든 요청 허용. 추후 인증인가 기능 추가 필요
+                        .anyRequest().permitAll()
                 )
                 .httpBasic(basic -> basic.disable())  // REST API 서버임으로 HTTP Basic 비활성화
                 .build();
