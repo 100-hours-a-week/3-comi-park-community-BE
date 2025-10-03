@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
+import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         String credential = findCredential(request)
                 .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
 
-        authStrategy.validate(credential);
+        AuthInfo authInfo = authStrategy.validate(credential);
 
         return true;
     }

@@ -39,7 +39,7 @@ public class AuthSessionStrategy implements AuthStrategy {
         }
 
         String sessionId = UUID.randomUUID().toString();
-        Session session = new Session(dto.getEmail());
+        AuthInfo session = new AuthInfo(member.getId());
 
         sessionRepository.save(sessionId, session);
 
@@ -47,8 +47,8 @@ public class AuthSessionStrategy implements AuthStrategy {
     }
 
     @Override
-    public String validate(String credential) {
-        Session session = sessionRepository.findById(credential)
+    public AuthInfo validate(String credential) {
+        AuthInfo session = sessionRepository.findById(credential)
                 .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
 
         if (session.isExpired()) {
@@ -56,7 +56,7 @@ public class AuthSessionStrategy implements AuthStrategy {
             throw new UnauthorizedException("인증 정보가 만료됐습니다");
         }
 
-        return session.getEmail();
+        return session;
     }
 
     @Override
