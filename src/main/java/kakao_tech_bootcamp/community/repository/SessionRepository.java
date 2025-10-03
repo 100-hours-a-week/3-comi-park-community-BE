@@ -20,8 +20,7 @@ public class SessionRepository {
         return Optional.ofNullable(sessions.get(sessionId));
     }
 
-    // JpaRepository와의 통일성 위해 리턴 값 Optional로 감쌈
-    public Optional<Session> delete(String sessionId) {
-        return Optional.ofNullable(sessions.remove(sessionId));
+    public void delete(String sessionId) {
+        sessions.remove(sessionId);
     }
 }

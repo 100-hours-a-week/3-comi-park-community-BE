@@ -61,6 +61,7 @@ public class AuthSessionStrategy implements AuthStrategy {
 
     @Override
     public void invalidate(String credential) {
-        sessionRepository.delete(credential).orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
+        // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
+        sessionRepository.delete(credential);
     }
 }
