@@ -2,6 +2,7 @@ package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.common.exceptions.BadRequestException;
 import kakao_tech_bootcamp.community.common.exceptions.ConflictException;
+import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.dto.MemberAvailabilityDto;
 import kakao_tech_bootcamp.community.dto.MemberCreateRequestDto;
@@ -73,7 +74,11 @@ public class MemberService {
         return memberResponseDto;
     }
 
-    public void modifyMember(Integer id, MemberUpdateRequestDto dto) {
+    public void modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
+        if (currentMemberId != id) {
+            throw new ForbiddenException("회원 본인 정보에 대해서만 수정할 수 있습니다");
+        }
+
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -86,7 +91,7 @@ public class MemberService {
                 throw new BadRequestException("비밀번호가 일치하지 않습니다");
             }
 
-            member.setPassword(dto.getPassword());
+            member.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         if (dto.getImage() != null) {
@@ -94,7 +99,11 @@ public class MemberService {
         }
     }
 
-    public void removeMember(Integer id) {
+    public void removeMember(Integer currentMemberId, Integer id) {
+        if (currentMemberId != id) {
+            throw new ForbiddenException("회원 본인만 탈퇴할 수 있습니다");
+        }
+
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
         memberRepository.delete(member);
