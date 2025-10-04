@@ -73,17 +73,19 @@ public class MemberService {
 
         MemberResponseDto memberResponseDto = new MemberResponseDto();
         ImageResponseDto imageResponseDto = new ImageResponseDto();
-        Image image = member.getImage();
 
-        imageResponseDto.setId(image.getId());
-        imageResponseDto.setUrl(imageService.createUrl(image.getObjectKey()));
-        imageResponseDto.setObjectKey(image.getObjectKey());
-        imageResponseDto.setFilename(image.getFilename());
+        if (member.getImage() != null) {
+            Image image = member.getImage();
+            imageResponseDto.setId(image.getId());
+            imageResponseDto.setUrl(imageService.createUrl(image.getObjectKey()));
+            imageResponseDto.setObjectKey(image.getObjectKey());
+            imageResponseDto.setFilename(image.getFilename());
+            memberResponseDto.setImage(imageResponseDto);
+        }
 
         memberResponseDto.setId(member.getId());
         memberResponseDto.setEmail(member.getEmail());
         memberResponseDto.setNickname(member.getNickname());
-        memberResponseDto.setImage(imageResponseDto);
         memberResponseDto.setCreatedAt(member.getCreatedAt());
 
         return memberResponseDto;
