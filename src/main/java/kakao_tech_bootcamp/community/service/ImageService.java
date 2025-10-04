@@ -5,7 +5,6 @@ import kakao_tech_bootcamp.community.dto.ImageResponseDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.repository.ImageRepository;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Log4j2
 @Service
 @Transactional
 public class ImageService {
@@ -36,10 +34,10 @@ public class ImageService {
         this.imageRepository = imageRepository;
     }
 
-    public ImageResponseDto saveImage(Integer currentMemberId, String type, MultipartFile file) throws IOException{
+    public ImageResponseDto saveImage(String type, MultipartFile file) throws IOException{
         String filename = file.getOriginalFilename();
 
-        String objectKey = createObjectKey(currentMemberId, type, filename);
+        String objectKey = createObjectKey(type, filename);
         Image image = new Image(filename, objectKey, ImageStatus.PENDING);
         Image saveImage = imageRepository.save(image);
 
@@ -56,7 +54,7 @@ public class ImageService {
         return imageResponseDto;
     }
 
-    private String createObjectKey(Integer currentMemberId, String type, String filename) {
+    private String createObjectKey(String type, String filename) {
         Matcher matcher = Pattern.compile(REGEX).matcher(filename);
 
         if (!matcher.find()) {
@@ -84,8 +82,6 @@ public class ImageService {
 
         if ("members".equals(type)) {
             sb.append("members/")
-                    .append(currentMemberId)
-                    .append("/")
                     .append(UUID.randomUUID().toString())
                     .append(".")
                     .append(extension);
