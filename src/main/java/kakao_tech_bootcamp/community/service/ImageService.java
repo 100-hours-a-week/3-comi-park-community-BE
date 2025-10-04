@@ -1,6 +1,7 @@
 package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.common.exceptions.BadRequestException;
+import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.dto.ImageResponseDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
@@ -54,6 +55,22 @@ public class ImageService {
         return imageResponseDto;
     }
 
+    public Image modifyImageStatusById(Integer imageId, ImageStatus imageStatus) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new NotFoundException("이미지를 찾을 수 없습니다"));
+        image.setStatus(imageStatus);
+        // TODO: 엔티티 말고 dto를 반환할 방법?
+        return image;
+    }
+
+    public void removeImage(Integer imageId, String objectKey) {
+        imageRepository.deleteById(imageId);
+
+        String filepath = createUrl(objectKey);
+        File destination = new File(filepath);
+        destination.delete(); // 물리적 이미지 파일 없거나 삭제 실패해도 오류 X
+    }
+
     private String createObjectKey(String type, String filename) {
         Matcher matcher = Pattern.compile(REGEX).matcher(filename);
 
@@ -98,7 +115,7 @@ public class ImageService {
         }
     }
 
-    private String createUrl(String objectKey) {
+    public String createUrl(String objectKey) {
         return domain + objectKey;
     }
 }
