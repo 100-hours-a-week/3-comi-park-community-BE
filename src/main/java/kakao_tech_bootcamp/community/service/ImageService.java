@@ -23,11 +23,11 @@ import java.util.regex.Pattern;
 @Service
 @Transactional
 public class ImageService {
+    private final static List<String> AVAILABLE_EXTENSIONS = List.of("png", "jpg", "jpeg", "png", "webp", "heic", "heif");
+    private final static String REGEX = ".([a-zA-Z]+)$";
+
     @Value("${storage.domain}")
     private String domain; // S3 사용한다고 가정해 dirPath 대신 domain 이름 설정
-    private final List<String> AVAILABLE_EXTENSIONS = List.of("png", "jpg", "jpeg", "png", "webp", "heic", "heif");
-    private final String REGEX = ".([a-zA-Z]+)$";
-
     private final ImageRepository imageRepository;
 
     @Autowired
