@@ -117,7 +117,14 @@ public class MemberService {
             Image currentImage = imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE);
             member.setImage(currentImage);
 
-            imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+            /*
+             removeImage()에는 데이터베이스뿐만 아니라 물리적인 이미지 파일 삭제까지 포함되어 있음
+             물리적인 이미지 파일 삭제는 트랜잭션처럼 롤백되지 못하므로
+             모든 데이터베이스 작업이 정상적으로 완료되어 이미지 삭제가 확정된 가장 마지막 시점에 이미지 삭제 처리 진행
+             */
+            if (previousImage != null) {
+                imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+            }
         }
     }
 
