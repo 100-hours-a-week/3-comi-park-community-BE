@@ -1,7 +1,6 @@
 package kakao_tech_bootcamp.community.dto;
 
 import jakarta.validation.constraints.Pattern;
-import kakao_tech_bootcamp.community.entity.Image;
 import lombok.Getter;
 
 @Getter
@@ -14,5 +13,5 @@ public class MemberUpdateRequestDto {
     @Pattern(regexp = "^\\S{1,10}$", message = "닉네임 형식이 유효하지 않습니다")
     private String nickname;
 
-    private Image image;
+    private ImageReferenceDto image;
 }

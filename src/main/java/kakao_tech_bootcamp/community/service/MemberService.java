@@ -4,10 +4,9 @@ import kakao_tech_bootcamp.community.common.exceptions.BadRequestException;
 import kakao_tech_bootcamp.community.common.exceptions.ConflictException;
 import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
-import kakao_tech_bootcamp.community.dto.MemberAvailabilityDto;
-import kakao_tech_bootcamp.community.dto.MemberCreateRequestDto;
-import kakao_tech_bootcamp.community.dto.MemberResponseDto;
-import kakao_tech_bootcamp.community.dto.MemberUpdateRequestDto;
+import kakao_tech_bootcamp.community.dto.*;
+import kakao_tech_bootcamp.community.entity.Image;
+import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +14,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 @Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final ImageService imageService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
+    public MemberService(MemberRepository memberRepository, ImageService imageService, PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
+        this.imageService = imageService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -54,8 +57,12 @@ public class MemberService {
             throw new ConflictException("중복된 닉네임입니다");
         }
 
+        Image image = dto.getImage() != null
+                ? imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE)
+                : null;
+
         String encoded = passwordEncoder.encode(dto.getPassword());
-        Member member = new Member(dto.getEmail(), encoded, dto.getNickname(), dto.getImage());
+        Member member = new Member(dto.getEmail(), encoded, dto.getNickname(), image);
 
         memberRepository.save(member);
     }
@@ -65,17 +72,25 @@ public class MemberService {
         Member member = memberRepository.findById(id).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
         MemberResponseDto memberResponseDto = new MemberResponseDto();
+        ImageResponseDto imageResponseDto = new ImageResponseDto();
+        Image image = member.getImage();
+
+        imageResponseDto.setId(image.getId());
+        imageResponseDto.setUrl(imageService.createUrl(image.getObjectKey()));
+        imageResponseDto.setObjectKey(image.getObjectKey());
+        imageResponseDto.setFilename(image.getFilename());
+
         memberResponseDto.setId(member.getId());
         memberResponseDto.setEmail(member.getEmail());
         memberResponseDto.setNickname(member.getNickname());
-        memberResponseDto.setImage(member.getImage());
+        memberResponseDto.setImage(imageResponseDto);
         memberResponseDto.setCreatedAt(member.getCreatedAt());
 
         return memberResponseDto;
     }
 
     public void modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
-        if (currentMemberId != id) {
+        if (!Objects.equals(currentMemberId, id)) {
             throw new ForbiddenException("회원 본인 정보에 대해서만 수정할 수 있습니다");
         }
 
@@ -95,17 +110,27 @@ public class MemberService {
         }
 
         if (dto.getImage() != null) {
-            member.setImage(dto.getImage());
+            Image previousImage = member.getImage();
+
+            Image currentImage = imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE);
+            member.setImage(currentImage);
+
+            imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
         }
     }
 
     public void removeMember(Integer currentMemberId, Integer id) {
-        if (currentMemberId != id) {
+        if (!Objects.equals(currentMemberId, id)) {
             throw new ForbiddenException("회원 본인만 탈퇴할 수 있습니다");
         }
 
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
-        memberRepository.delete(member);
+
+        memberRepository.delete(member); // image on delete cascade
+
+        if (member.getImage() != null) {
+            imageService.removeImage(member.getImage().getId(), member.getImage().getObjectKey());
+        }
     }
 }
