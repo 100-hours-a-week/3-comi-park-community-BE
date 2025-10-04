@@ -39,7 +39,7 @@ public class AuthController {
     public ResponseEntity login(@CookieValue("sid") String sessionId) {
         authStrategy.invalidate(sessionId);
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId).maxAge(0).build();
-        return ResponseEntity.status(HttpStatus.ACCEPTED)
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .header(SET_COOKIE, cookie.toString())
                 .build();
     }
