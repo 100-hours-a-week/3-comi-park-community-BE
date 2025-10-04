@@ -6,6 +6,7 @@ import kakao_tech_bootcamp.community.dto.ImageResponseDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,13 +28,13 @@ public class ImageController {
     public ResponseEntity<ApiResponse> saveMemberImage(@RequestParam("file") MultipartFile file) throws IOException {
         ImageResponseDto imageResponseDto = imageService.saveImage("members", file);
         Map<String, ImageResponseDto> data = Map.of("image", imageResponseDto);
-        return ResponseEntity.ok(new ApiResponse<>("upload_success", data));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("upload_success", data));
     }
 
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse> savePostImage(@CurrentMember AuthInfo authInfo, @RequestParam("file") MultipartFile file) throws IOException {
         ImageResponseDto imageResponseDto = imageService.saveImage("posts", file);
         Map<String, ImageResponseDto> data = Map.of("image", imageResponseDto);
-        return ResponseEntity.ok(new ApiResponse<>("upload_success", data));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("upload_success", data));
     }
 }
