@@ -111,6 +111,17 @@ public class MemberService {
             member.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
+        /*
+          dto.getImageDeleted() → 기존 프로필 이미지 제거할 때만 처리 (기존 프로필 이미지 유지 및 다른 이미지로 변경과는 무관)
+          dto.getImage() == null → 단, imageDeleted == true더라도 새 이미지 전달하면(not null) 프로필 이미지 변경으로 간주
+          member.getImage() != null → 기존 프로필 있을 때만 제거 처리
+         */
+        if (dto.getImageDeleted() && dto.getImage() == null && member.getImage() != null) {
+            Image previousImage = member.getImage();
+            member.setImage(null);
+            imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+        }
+
         if (dto.getImage() != null) {
             Image previousImage = member.getImage();
 

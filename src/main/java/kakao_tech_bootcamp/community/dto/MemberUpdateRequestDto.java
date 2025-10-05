@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.dto;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
@@ -14,4 +15,7 @@ public class MemberUpdateRequestDto {
     private String nickname;
 
     private ImageReferenceDto image;
+
+    @NotNull(message = "imageDeleted 필드는 필수 값입니다")
+    private Boolean imageDeleted;
 }
