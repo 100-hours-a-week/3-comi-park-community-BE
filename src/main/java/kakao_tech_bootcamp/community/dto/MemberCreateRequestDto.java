@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import kakao_tech_bootcamp.community.entity.Image;
 import lombok.Getter;
 
 @Getter
@@ -22,5 +21,5 @@ public class MemberCreateRequestDto {
     @Pattern(regexp = "^\\S{1,10}$", message = "닉네임 형식이 유효하지 않습니다")
     private String nickname;
 
-    private Image image;
+    private ImageReferenceDto image;
 }

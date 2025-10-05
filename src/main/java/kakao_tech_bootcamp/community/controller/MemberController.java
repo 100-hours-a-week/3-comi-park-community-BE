@@ -52,7 +52,7 @@ public class MemberController {
                                        @PathVariable Integer memberId,
                                        @RequestBody @Validated MemberUpdateRequestDto updateMemberRequestDto) {
         memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/{memberId}")
