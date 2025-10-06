@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "post")
 @Getter @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
     @Id
@@ -27,11 +27,11 @@ public class Post {
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     private Image image;
 
