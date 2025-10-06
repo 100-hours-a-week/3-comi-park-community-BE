@@ -2,14 +2,8 @@ package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
-import kakao_tech_bootcamp.community.entity.Image;
-import kakao_tech_bootcamp.community.entity.Member;
-import kakao_tech_bootcamp.community.entity.Post;
-import kakao_tech_bootcamp.community.entity.PostAdditional;
-import kakao_tech_bootcamp.community.repository.ImageRepository;
-import kakao_tech_bootcamp.community.repository.MemberRepository;
-import kakao_tech_bootcamp.community.repository.PostAdditionalRepository;
-import kakao_tech_bootcamp.community.repository.PostRepository;
+import kakao_tech_bootcamp.community.entity.*;
+import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
     private final PostRepository postRepository;
     private final PostAdditionalRepository postAdditionalRepository;
+    private final PostStatRepository postStatRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
 
@@ -41,5 +36,6 @@ public class PostService {
     private void savePost(Post post) {
         Post savePost = postRepository.save(post);
         postAdditionalRepository.save(new PostAdditional(savePost));
+        postStatRepository.save(new PostStat(savePost.getId()));
     }
 }
