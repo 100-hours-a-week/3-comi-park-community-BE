@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -12,9 +11,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 @Table(name = "post")
-@Getter @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
     @Id
@@ -43,9 +42,26 @@ public class Post {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public Post(String title, String content, Member member) {
+    public Post(String title, String content, Member member, Image image) {
         this.title = title;
         this.content = content;
         this.member = member;
+        this.image = image;
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeContent(String content) {
+        this.content = content;
+    }
+
+    public void changeImage(Image image) {
+        this.image = image;
+    }
+
+    public void markDeleted() {
+        isDeleted = true;
     }
 }
