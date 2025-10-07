@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,10 +27,17 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("post_create_success", null));
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse> findPosts(@CurrentMember AuthInfo authInfo,
+                                                 @RequestParam(value = "lastPostId", required = false) Integer lastPostId,
+                                                 @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
+        List<PostResponseDto> posts = postService.findPosts(authInfo.getId(), lastPostId, limit);
+        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("posts", posts)));
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse> findPost(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
         PostResponseDto post = postService.findPost(authInfo.getId(), postId);
-        Map<String, PostResponseDto> data = Map.of("post", post);
-        return ResponseEntity.ok(new ApiResponse<>("ok", data));
+        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("post", post)));
     }
 }

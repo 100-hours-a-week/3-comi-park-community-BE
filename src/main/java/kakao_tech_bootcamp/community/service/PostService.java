@@ -6,8 +6,13 @@ import kakao_tech_bootcamp.community.dto.PostResponseDto;
 import kakao_tech_bootcamp.community.entity.*;
 import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -48,6 +53,18 @@ public class PostService {
         postStatRepository.save(postStat);
 
         return PostResponseDto.of(post, isLiked, postStat);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
+        Pageable pageable = PageRequest.of(0, limit, Sort.by("id").descending());
+        List<Post> posts = lastPostId == null
+                ? postRepository.findByIsDeletedFalseOrderByIdDesc(pageable)
+                : postRepository.findByIsDeletedFalseAndIdLessThanOrderByIdDesc(lastPostId, pageable);
+
+        return posts.stream().map(x -> PostResponseDto.of(x,
+                memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(x.getId(), currentMemberId),
+                postStatRepository.findById(x.getId()).orElseGet(() -> findPostStat(x.getId())))).toList();
     }
 
     private void savePost(Post post) {
