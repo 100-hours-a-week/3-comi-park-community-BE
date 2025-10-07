@@ -20,6 +20,7 @@ public class PostService {
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
+    private final CommentRepository commentRepository;
 
     public void savePost(Integer currentMemberId, PostCreateRequestDto dto) {
         Member member = memberRepository.findById(currentMemberId)
@@ -56,10 +57,9 @@ public class PostService {
     }
 
     private PostStat findPostStat(Integer postId) {
-        // TODO: PostAdditional, MemberPostLike, Comment 레포지터리에서 count 조회 후 초기화
-        int viewCount = 0;
-        int likeCount = 0;
-        int commentCount = 0;
+        int viewCount = postAdditionalRepository.countByPostId(postId);
+        int likeCount = memberPostLikeRepository.countByMemberPostLikeIdPostId(postId);
+        int commentCount = commentRepository.countByPostId(postId);
         return new PostStat(postId, viewCount, likeCount, commentCount);
     }
 }

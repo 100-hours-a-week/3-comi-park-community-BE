@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MemberPostLikeRepository extends JpaRepository<MemberPostLike, MemberPostLikeId> {
     boolean existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(Integer postId, Integer memberId);
+
+    int countByMemberPostLikeIdPostId(Integer postId);
 }
