@@ -38,7 +38,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostResponseDto findPost(Integer currentMemberId, Integer postId) {
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
 
         PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> findPostStat(postId));
