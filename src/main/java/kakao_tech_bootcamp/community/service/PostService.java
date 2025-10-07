@@ -1,8 +1,10 @@
 package kakao_tech_bootcamp.community.service;
 
+import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.PostResponseDto;
+import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
 import kakao_tech_bootcamp.community.entity.*;
 import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -24,8 +26,9 @@ public class PostService {
     private final PostStatRepository postStatRepository;
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final MemberRepository memberRepository;
-    private final ImageRepository imageRepository;
+    private final ImageRepository imageRepository; // TODO : 없애기
     private final CommentRepository commentRepository;
+    private final ImageService imageService;
 
     public void savePost(Integer currentMemberId, PostCreateRequestDto dto) {
         Member member = memberRepository.findById(currentMemberId)
@@ -65,6 +68,48 @@ public class PostService {
         return posts.stream().map(x -> PostResponseDto.of(x,
                 memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(x.getId(), currentMemberId),
                 postStatRepository.findById(x.getId()).orElseGet(() -> findPostStat(x.getId())))).toList();
+    }
+
+    public void modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+
+        if (!Objects.equals(post.getMember().getId(), currentMemberId)) {
+            throw new ForbiddenException("게시글을 작성한 회원만 수정할 수 있습니다");
+        }
+
+        if (dto.getPostDeleted()) {
+            post.markDeleted(); // 관련 이미지 상태는 여전히 ACTIVE (배치 프로그램에 의해 삭제되지 않도록)
+            return; // soft delete 요청 시 그 외 게시글 수정 무시
+        }
+
+        if (dto.getTitle() != null) {
+            post.changeTitle(dto.getTitle());
+        }
+
+        if (dto.getContent() != null) {
+            post.changeContent(dto.getContent());
+        }
+
+        /*
+         이미지 삭제 true이고, 새 이미지도 전송하지 않았다면 기존 이미지 삭제 처리
+         만약 이미지 삭제 true더라도 새 이미지를 전송했다면 새로운 이미지로의 변경으로 간주함
+         */
+        if (dto.getImageDeleted() && dto.getImage() == null && post.getImage() != null) {
+            Image previousImage = post.getImage();
+            post.changeImage(null);
+            imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+        }
+
+        if (dto.getImage() != null) {
+            Image previousImage = post.getImage();
+
+            Image currentImage = imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE);
+            post.changeImage(currentImage);
+
+            if (previousImage != null) {
+                imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+            }
+        }
     }
 
     private void savePost(Post post) {

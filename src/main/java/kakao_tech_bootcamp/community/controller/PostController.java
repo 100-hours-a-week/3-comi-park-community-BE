@@ -4,11 +4,13 @@ import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.PostResponseDto;
+import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,5 +41,13 @@ public class PostController {
     public ResponseEntity<ApiResponse> findPost(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
         PostResponseDto post = postService.findPost(authInfo.getId(), postId);
         return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("post", post)));
+    }
+
+    @PatchMapping("/{postId}")
+    public ResponseEntity modifyPost(@CurrentMember AuthInfo authInfo,
+                                                  @PathVariable Integer postId,
+                                                  @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
+        postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
