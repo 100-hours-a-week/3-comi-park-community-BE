@@ -17,6 +17,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostAdditionalRepository postAdditionalRepository;
     private final PostStatRepository postStatRepository;
+    private final MemberPostLikeRepository memberPostLikeRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
 
@@ -38,13 +39,13 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
 
-        PostStat postStat = postStatRepository.findById(postId)
-                .orElseGet(() -> findPostStat(postId));
+        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> findPostStat(postId));
+        boolean isLiked = memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 
         postStat.incrementViewCount();
         postStatRepository.save(postStat);
 
-        return PostResponseDto.of(post, postStat);
+        return PostResponseDto.of(post, isLiked, postStat);
     }
 
     private void savePost(Post post) {
