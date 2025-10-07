@@ -26,7 +26,6 @@ public class PostService {
     private final PostStatRepository postStatRepository;
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final MemberRepository memberRepository;
-    private final ImageRepository imageRepository; // TODO : 없애기
     private final CommentRepository commentRepository;
     private final ImageService imageService;
 
@@ -34,12 +33,9 @@ public class PostService {
         Member member = memberRepository.findById(currentMemberId)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
-        Image image = null;
-
-        if (dto.getImage() != null) {
-            image = imageRepository.findById(dto.getImage().getId())
-                    .orElseThrow(() -> new NotFoundException("이미지를 찾을 수 없습니다"));
-        }
+        Image image = dto.getImage() != null
+                ? imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE)
+                : null;
 
         savePost(new Post(dto.getTitle(), dto.getContent(), member, image));
     }
