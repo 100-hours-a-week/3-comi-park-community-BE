@@ -2,19 +2,15 @@ package kakao_tech_bootcamp.community.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Embeddable
-@Getter @Setter
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class MemberPostLikeId {
     @Column(name = "post_id", nullable = false, updatable = false)
     private Integer postId;
     @Column(name = "member_id", nullable = false, updatable = false)
     private Integer memberId;
-
-    public MemberPostLikeId(Integer postId, Integer memberId) {
-        this.postId = postId;
-        this.memberId = memberId;
-    }
 }
