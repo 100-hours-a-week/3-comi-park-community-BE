@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Integer>, PostRepositoryCustom {
     Optional<Post> findByIdAndIsDeletedFalse(Integer postId);
 
+    boolean existsByIdAndIsDeletedFalse(Integer postId);
+
     // TODO: 카디널리티 폭발... 해결 필요
     @EntityGraph(attributePaths = {"member", "member.image", "image"})
     List<Post> findByIsDeletedFalseOrderByIdDesc(Pageable pageable);
