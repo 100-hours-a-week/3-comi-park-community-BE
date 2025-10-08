@@ -128,7 +128,7 @@ public class PostService {
     }
 
     private PostStat findPostStat(Integer postId) {
-        int viewCount = postAdditionalRepository.countByPostId(postId);
+        int viewCount = postAdditionalRepository.findViewCountByPostId(postId);
         int likeCount = memberPostLikeRepository.countByMemberPostLikeIdPostId(postId);
         int commentCount = commentRepository.countByPostId(postId);
         return new PostStat(postId, viewCount, likeCount, commentCount);
