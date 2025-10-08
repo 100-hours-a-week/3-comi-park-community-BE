@@ -51,12 +51,23 @@ public class CommentService {
         postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
 
-        if (Objects.equals(comment.getMember().getId(), currentMemberId)) {
+        if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
             throw new ForbiddenException("댓글을 작성한 회원만 수정할 수 있습니다");
         }
 
         comment.changeContent(dto.getContent());
 
         return CommentResponseDto.of(comment);
+    }
+
+    public void removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
+        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
+
+        if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
+            throw new ForbiddenException("댓글을 작성한 회원만 삭제할 수 있습니다");
+        }
+
+        commentRepository.delete(comment);
     }
 }

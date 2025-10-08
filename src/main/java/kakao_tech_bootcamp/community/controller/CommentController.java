@@ -45,4 +45,12 @@ public class CommentController {
         CommentResponseDto comment = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
         return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("data", comment)));
     }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<ApiResponse> removeComment(@CurrentMember AuthInfo authInfo,
+                                                     @PathVariable("postId") Integer postId,
+                                                     @PathVariable("commentId") Integer commentId) {
+        commentService.removeComment(authInfo.getId(), postId, commentId);
+        return ResponseEntity.ok(new ApiResponse<>("ok", null));
+    }
 }
