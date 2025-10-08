@@ -10,7 +10,6 @@ import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +57,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<PostResponseDto> findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(0, limit);
         List<Post> posts = lastPostId == null
                 ? postRepository.findByIsDeletedFalseOrderByIdDesc(pageable)
                 : postRepository.findByIsDeletedFalseAndIdLessThanOrderByIdDesc(lastPostId, pageable);
@@ -129,7 +128,7 @@ public class PostService {
     }
 
     private PostStat findPostStat(Integer postId) {
-        int viewCount = postAdditionalRepository.countByPostId(postId);
+        int viewCount = postAdditionalRepository.findViewCountByPostId(postId);
         int likeCount = memberPostLikeRepository.countByMemberPostLikeIdPostId(postId);
         int commentCount = commentRepository.countByPostId(postId);
         return new PostStat(postId, viewCount, likeCount, commentCount);
