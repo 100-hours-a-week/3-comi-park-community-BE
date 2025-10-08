@@ -12,8 +12,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 @Table(name = "comment")
-@Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
@@ -43,6 +43,10 @@ public class Comment {
     public Comment(Post post, Member member, String content) {
         this.post = post;
         this.member = member;
+        this.content = content;
+    }
+
+    public void changeContent(String content) {
         this.content = content;
     }
 }
