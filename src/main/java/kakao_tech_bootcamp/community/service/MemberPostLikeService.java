@@ -3,6 +3,7 @@ package kakao_tech_bootcamp.community.service;
 import kakao_tech_bootcamp.community.common.exceptions.ConflictException;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.entity.MemberPostLike;
+import kakao_tech_bootcamp.community.entity.MemberPostLikeId;
 import kakao_tech_bootcamp.community.entity.PostStat;
 import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,26 @@ public class MemberPostLikeService {
 
         PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> findPostStat(postId));
         postStat.incrementLikeCount();
+        postStatRepository.save(postStat);
+
+        return postStat.getLikeCount();
+    }
+
+    public int removeLike(Integer currentMemberId, Integer postId) {
+        if (!postRepository.existsByIdAndIsDeletedFalse(postId)) {
+            throw new NotFoundException("게시글을 찾을 수 없습니다");
+        }
+
+        boolean likeExists = likeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
+
+        if (!likeExists) {
+            throw new NotFoundException("좋아요를 찾을 수 없습니다");
+        }
+
+        likeRepository.deleteById(new MemberPostLikeId(postId, currentMemberId));
+
+        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> findPostStat(postId));
+        postStat.decrementLikeCount();
         postStatRepository.save(postStat);
 
         return postStat.getLikeCount();

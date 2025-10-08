@@ -7,10 +7,7 @@ import kakao_tech_bootcamp.community.service.MemberPostLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -26,5 +23,11 @@ public class MemberPostLikeController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponse<>("like_create_success", Map.of("likeCount", likeCount)));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> removeLike(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
+        int likeCount = likeService.removeLike(authInfo.getId(), postId);
+        return ResponseEntity.ok(new ApiResponse<>("like_delete_success", Map.of("likeCount", likeCount)));
     }
 }
