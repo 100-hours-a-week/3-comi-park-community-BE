@@ -38,12 +38,12 @@ public class CommentController {
     }
 
     @PatchMapping("/{commentId}")
-    public ResponseEntity<ApiResponse<Map<String, CommentResponseDto>>> modifyComment(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, Object>>> modifyComment(@CurrentMember AuthInfo authInfo,
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId,
                                                      @RequestBody @Validated CommentRequestDto commentRequestDto) {
-        CommentResponseDto comment = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
-        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("data", comment)));
+        Map<String, Object> modifiedFiles = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
+        return ResponseEntity.ok(new ApiResponse<>("ok", modifiedFiles));
     }
 
     @DeleteMapping("/{commentId}")

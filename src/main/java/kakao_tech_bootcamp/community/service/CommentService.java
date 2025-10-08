@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -46,7 +47,7 @@ public class CommentService {
         return comments.stream().map(CommentResponseDto::of).toList();
     }
 
-    public CommentResponseDto modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
+    public Map<String, Object> modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
         postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
 
@@ -56,7 +57,7 @@ public class CommentService {
 
         comment.changeContent(dto.getContent());
 
-        return CommentResponseDto.of(comment);
+        return Map.of("content", comment.getContent());
     }
 
     public void removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
