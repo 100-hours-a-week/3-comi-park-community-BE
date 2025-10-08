@@ -58,7 +58,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<PostResponseDto> findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(0, limit);
         List<Post> posts = lastPostId == null
                 ? postRepository.findByIsDeletedFalseOrderByIdDesc(pageable)
                 : postRepository.findByIsDeletedFalseAndIdLessThanOrderByIdDesc(lastPostId, pageable);

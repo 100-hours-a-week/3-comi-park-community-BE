@@ -39,7 +39,7 @@ public class CommentService {
     public List<CommentResponseDto> findComments(Integer postId, Integer lastCommentId, Integer limit) {
         postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
 
-        Pageable pageable = PageRequest.of(0, limit, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(0, limit);
         List<Comment> comments = lastCommentId == null
                 ? commentRepository.findByPostIdOrderByIdDesc(postId, pageable)
                 : commentRepository.findByPostIdAndIdLessThanOrderByIdDesc(postId, lastCommentId, pageable);
