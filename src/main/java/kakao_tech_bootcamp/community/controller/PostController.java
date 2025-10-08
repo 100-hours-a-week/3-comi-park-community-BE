@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -49,5 +50,15 @@ public class PostController {
                                                   @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
         postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse> removePosts(@CurrentMember AuthInfo authInfo,
+                                      @RequestParam(value = "before", required = false) LocalDate before,
+                                      @RequestParam(value = "after", required = false) LocalDate after,
+                                      @RequestParam(value = "writer", required = false) Integer memberId) {
+        // TODO: 회원 권한 확인 필요
+        long affectedRows = postService.removePosts(before, after, memberId);
+        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("affectedRows", affectedRows)));
     }
 }

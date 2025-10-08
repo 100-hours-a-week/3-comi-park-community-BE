@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -106,6 +108,18 @@ public class PostService {
                 imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
             }
         }
+    }
+
+    public long removePosts(LocalDate before, LocalDate after, Integer memberId) {
+        if (before == null && after == null && memberId == null) {
+            return 0; // 쿼리스트링 없으면 아무 작업 X
+        }
+
+        // LocalDateTime createdAt과 비교하기 위해 레포지터리가 아닌 서비스 계층에서 미리 변환
+        LocalDateTime convertedBefore = before != null ? before.plusDays(1).atStartOfDay() : null;
+        LocalDateTime convertedAfter = after != null ? after.atStartOfDay() : null;
+
+        return postRepository.deleteAllByIsDeletedTrueAndDynamicFilters(memberId, convertedBefore, convertedAfter);
     }
 
     private void savePost(Post post) {

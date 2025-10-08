@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Integer> {
+public interface PostRepository extends JpaRepository<Post, Integer>, PostRepositoryCustom {
     Optional<Post> findByIdAndIsDeletedFalse(Integer postId);
 
     // TODO: 카디널리티 폭발... 해결 필요
