@@ -23,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> logout(@RequestBody @Validated AuthRequestDto authRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody @Validated AuthRequestDto authRequestDto) {
         String sessionId = authStrategy.issue(authRequestDto);
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
                 .httpOnly(true)
@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @DeleteMapping
-    public ResponseEntity logout(@CookieValue("sid") String sessionId) {
+    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
         authStrategy.invalidate(sessionId);
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId).maxAge(0).build();
         return ResponseEntity.status(HttpStatus.NO_CONTENT)

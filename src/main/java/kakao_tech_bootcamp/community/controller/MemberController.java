@@ -24,31 +24,31 @@ public class MemberController {
     }
 
     @PostMapping("/availability/email")
-    public ResponseEntity<ApiResponse> isAvailableEmail(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
+    public ResponseEntity<ApiResponse<Void>> isAvailableEmail(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
         memberService.existsByEmail(memberAvailabilityDto);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", null));
     }
 
     @PostMapping("/availability/nickname")
-    public ResponseEntity<ApiResponse> isAvailableNickname(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
+    public ResponseEntity<ApiResponse<Void>> isAvailableNickname(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
         memberService.existsByNickname(memberAvailabilityDto);
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", null));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> saveMember(@RequestBody @Validated MemberCreateRequestDto memberCreateRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> saveMember(@RequestBody @Validated MemberCreateRequestDto memberCreateRequestDto) {
         memberService.saveMember(memberCreateRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("register_success", null));
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<ApiResponse> findMember(@PathVariable Integer memberId) {
-        Map<String, MemberResponseDto> data = Map.of("member", memberService.findMember(memberId));
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", data));
+    public ResponseEntity<ApiResponse<Map<String, MemberResponseDto>>> findMember(@PathVariable Integer memberId) {
+        MemberResponseDto member = memberService.findMember(memberId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", Map.of("member", member)));
     }
 
     @PatchMapping("/{memberId}")
-    public ResponseEntity modifyMember(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<Void> modifyMember(@CurrentMember AuthInfo authInfo,
                                        @PathVariable Integer memberId,
                                        @RequestBody @Validated MemberUpdateRequestDto updateMemberRequestDto) {
         memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
@@ -56,7 +56,7 @@ public class MemberController {
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity removeMember(@CurrentMember AuthInfo authInfo, @PathVariable Integer memberId) {
+    public ResponseEntity<Void> removeMember(@CurrentMember AuthInfo authInfo, @PathVariable Integer memberId) {
         memberService.removeMember(authInfo.getId(), memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

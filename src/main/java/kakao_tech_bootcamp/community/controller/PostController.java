@@ -24,14 +24,14 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> savePost(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Void>> savePost(@CurrentMember AuthInfo authInfo,
                                                 @RequestBody PostCreateRequestDto postCreateRequestDto) {
         postService.savePost(authInfo.getId(), postCreateRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("post_create_success", null));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findPosts(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, List<PostResponseDto>>>> findPosts(@CurrentMember AuthInfo authInfo,
                                                  @RequestParam(value = "lastPostId", required = false) Integer lastPostId,
                                                  @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
         List<PostResponseDto> posts = postService.findPosts(authInfo.getId(), lastPostId, limit);
@@ -39,13 +39,13 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<ApiResponse> findPost(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
+    public ResponseEntity<ApiResponse<Map<String, PostResponseDto>>> findPost(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
         PostResponseDto post = postService.findPost(authInfo.getId(), postId);
         return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("post", post)));
     }
 
     @PatchMapping("/{postId}")
-    public ResponseEntity modifyPost(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<Void> modifyPost(@CurrentMember AuthInfo authInfo,
                                                   @PathVariable Integer postId,
                                                   @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
         postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
@@ -53,7 +53,7 @@ public class PostController {
     }
 
     @DeleteMapping
-    public ResponseEntity<ApiResponse> removePosts(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, Long>>> removePosts(@CurrentMember AuthInfo authInfo,
                                       @RequestParam(value = "before", required = false) LocalDate before,
                                       @RequestParam(value = "after", required = false) LocalDate after,
                                       @RequestParam(value = "writer", required = false) Integer memberId) {

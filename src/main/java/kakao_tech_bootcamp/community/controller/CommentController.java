@@ -22,7 +22,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> saveComment(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, CommentResponseDto>>> saveComment(@CurrentMember AuthInfo authInfo,
                                                    @PathVariable Integer postId,
                                                    @RequestBody @Validated CommentRequestDto commentRequestDto) {
         CommentResponseDto comment = commentService.saveComment(authInfo.getId(), postId, commentRequestDto);
@@ -30,7 +30,7 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> findComments(@PathVariable Integer postId,
+    public ResponseEntity<ApiResponse<Map<String, List<CommentResponseDto>>>> findComments(@PathVariable Integer postId,
                                                    @RequestParam(value = "lastCommentId", required = false) Integer lastCommentId,
                                                    @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
         List<CommentResponseDto> comments = commentService.findComments(postId, lastCommentId, limit);
@@ -38,7 +38,7 @@ public class CommentController {
     }
 
     @PatchMapping("/{commentId}")
-    public ResponseEntity<ApiResponse> modifyComment(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, CommentResponseDto>>> modifyComment(@CurrentMember AuthInfo authInfo,
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId,
                                                      @RequestBody @Validated CommentRequestDto commentRequestDto) {
@@ -47,7 +47,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<ApiResponse> removeComment(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Void>> removeComment(@CurrentMember AuthInfo authInfo,
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId) {
         commentService.removeComment(authInfo.getId(), postId, commentId);
