@@ -36,4 +36,13 @@ public class CommentController {
         List<CommentResponseDto> comments = commentService.findComments(postId, lastCommentId, limit);
         return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("comments", comments)));
     }
+
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<ApiResponse> modifyComment(@CurrentMember AuthInfo authInfo,
+                                                     @PathVariable("postId") Integer postId,
+                                                     @PathVariable("commentId") Integer commentId,
+                                                     @RequestBody @Validated CommentRequestDto commentRequestDto) {
+        CommentResponseDto comment = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
+        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("data", comment)));
+    }
 }

@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.service;
 
+import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.dto.CommentRequestDto;
 import kakao_tech_bootcamp.community.dto.CommentResponseDto;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -43,5 +45,18 @@ public class CommentService {
                 : commentRepository.findByPostIdAndIdLessThanOrderByIdDesc(postId, lastCommentId, pageable);
 
         return comments.stream().map(CommentResponseDto::of).toList();
+    }
+
+    public CommentResponseDto modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
+        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
+
+        if (Objects.equals(comment.getMember().getId(), currentMemberId)) {
+            throw new ForbiddenException("댓글을 작성한 회원만 수정할 수 있습니다");
+        }
+
+        comment.changeContent(dto.getContent());
+
+        return CommentResponseDto.of(comment);
     }
 }
