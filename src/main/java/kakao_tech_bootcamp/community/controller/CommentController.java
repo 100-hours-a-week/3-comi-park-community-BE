@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,5 +27,13 @@ public class CommentController {
                                                    @RequestBody @Validated CommentRequestDto commentRequestDto) {
         CommentResponseDto comment = commentService.saveComment(authInfo.getId(), postId, commentRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("comment_create_success", Map.of("comment", comment)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse> findComments(@PathVariable Integer postId,
+                                                   @RequestParam(value = "lastCommentId", required = false) Integer lastCommentId,
+                                                   @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
+        List<CommentResponseDto> comments = commentService.findComments(postId, lastCommentId, limit);
+        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("comments", comments)));
     }
 }
