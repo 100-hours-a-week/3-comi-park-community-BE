@@ -1,12 +1,18 @@
 package kakao_tech_bootcamp.community.dto;
 
+import kakao_tech_bootcamp.community.entity.Image;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter @Setter
+@Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ImageReferenceDto {
     private Integer id;
     private String objectKey;
+
+    public static ImageReferenceDto of(Image image) {
+        return image != null ? new ImageReferenceDto(image.getId(), image.getObjectKey()) : new ImageReferenceDto();
+    }
 }

@@ -70,25 +70,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberResponseDto findMember(Integer id) {
         Member member = memberRepository.findById(id).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
-
-        MemberResponseDto memberResponseDto = new MemberResponseDto();
-        ImageResponseDto imageResponseDto = new ImageResponseDto();
-
-        if (member.getImage() != null) {
-            Image image = member.getImage();
-            imageResponseDto.setId(image.getId());
-            imageResponseDto.setUrl(imageService.createUrl(image.getObjectKey()));
-            imageResponseDto.setObjectKey(image.getObjectKey());
-            imageResponseDto.setFilename(image.getFilename());
-            memberResponseDto.setImage(imageResponseDto);
-        }
-
-        memberResponseDto.setId(member.getId());
-        memberResponseDto.setEmail(member.getEmail());
-        memberResponseDto.setNickname(member.getNickname());
-        memberResponseDto.setCreatedAt(member.getCreatedAt());
-
-        return memberResponseDto;
+        return MemberResponseDto.of(member);
     }
 
     public void modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
