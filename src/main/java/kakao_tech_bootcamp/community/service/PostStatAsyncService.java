@@ -27,4 +27,14 @@ public class PostStatAsyncService {
     public void asyncDecrementLikeCount(Integer postId) {
         postStatRepository.decrementLikeCountById(postId);
     }
+
+    @Async
+    public void asyncIncrementCommentCount(Integer postId) {
+        postStatRepository.incrementCommentCountById(postId);
+    }
+
+    @Async
+    public void asyncDecrementCommentCount(Integer postId) {
+        postStatRepository.decrementCommentCountById(postId);
+    }
 }
