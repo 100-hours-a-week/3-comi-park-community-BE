@@ -16,4 +16,12 @@ public interface PostStatRepository extends JpaRepository<PostStat, Integer> {
     @Modifying
     @Query("update PostStat ps set ps.viewCount = ps.viewCount + 1 where ps.postId = :postId")
     void incrementViewCountById(@Param("postId") Integer postId);
+
+    @Modifying
+    @Query("update PostStat ps set ps.likeCount = ps.likeCount + 1 where ps.postId = :postId")
+    void incrementLikeCountById(@Param("postId") Integer postId);
+
+    @Modifying
+    @Query("update PostStat ps set ps.likeCount = ps.likeCount - 1 where ps.postId = :postId")
+    void decrementLikeCountById(@Param("postId") Integer postId);
 }

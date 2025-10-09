@@ -56,4 +56,14 @@ public class PostStatService {
         postStat.incrementViewCount(); // 응답에 사용하기 위해 메모리에서만 증가 처리
         postStatAsyncService.asyncIncrementViewCount(postStat.getPostId()); // 실제 DB 반영은 비동기로 처리
     }
+
+    public int incrementLikeCount(PostStat postStat) {
+        postStatAsyncService.asyncIncrementLikeCount(postStat.getPostId());
+        return postStat.getLikeCount() + 1;
+    }
+
+    public int decrementLikeCount(PostStat postStat) {
+        postStatAsyncService.asyncDecrementLikeCount(postStat.getPostId());
+        return postStat.getLikeCount() - 1;
+    }
 }

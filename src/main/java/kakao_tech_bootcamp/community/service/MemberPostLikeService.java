@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -32,11 +31,10 @@ public class MemberPostLikeService {
 
         PostStat postStat = postStatService.findPostStat(post)
                 .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
-        postStat.incrementLikeCount();
+        int likeCount = postStatService.incrementLikeCount(postStat);
 
         likeRepository.save(new MemberPostLike(postId, currentMemberId));
-
-        return postStat.getLikeCount();
+        return likeCount;
     }
 
     public int removeLike(Integer currentMemberId, Integer postId) {
@@ -51,10 +49,10 @@ public class MemberPostLikeService {
 
         PostStat postStat = postStatService.findPostStat(post)
                 .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
-        postStat.decrementLikeCount();
+        int likeCount = postStatService.decrementLikeCount(postStat);
 
         likeRepository.deleteById(new MemberPostLikeId(postId, currentMemberId));
 
-        return postStat.getLikeCount();
+        return likeCount;
     }
 }
