@@ -53,8 +53,7 @@ public class PostService {
 
         PostStat postStat = postStatService.findPostStat(post)
                 .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
-        // FIXME: @Transactional(readOnly = true)이므로 dirty checking 안 됨 -> DB 반영 X
-        postStat.incrementViewCount();
+        postStatService.incrementViewCount(postStat);
 
         return PostResponseDto.of(post, isLiked, postStat);
     }

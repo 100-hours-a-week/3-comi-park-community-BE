@@ -20,6 +20,7 @@ public class PostStatService {
     private final PostStatRepository postStatRepository;
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final CommentRepository commentRepository;
+    private final PostStatAsyncService postStatAsyncService;
 
     @PersistenceContext
     private EntityManager em;
@@ -49,5 +50,10 @@ public class PostStatService {
          */
         Post postRef = em.getReference(Post.class, post.getId());
         return postStatRepository.save(new PostStat(postRef, likeCount, commentCount));
+    }
+
+    public void incrementViewCount(PostStat postStat) {
+        postStat.incrementViewCount(); // 응답에 사용하기 위해 메모리에서만 증가 처리
+        postStatAsyncService.asyncIncrementViewCount(postStat.getPostId()); // 실제 DB 반영은 비동기로 처리
     }
 }
