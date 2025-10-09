@@ -8,6 +8,7 @@ import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
 import kakao_tech_bootcamp.community.entity.*;
 import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,16 +19,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+@Log4j2
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final PostStatRepository postStatRepository;
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final MemberRepository memberRepository;
-    private final CommentRepository commentRepository;
     private final ImageService imageService;
+    private final PostStatService postStatService;
 
     public void savePost(Integer currentMemberId, PostCreateRequestDto dto) {
         Member member = memberRepository.findById(currentMemberId)
@@ -37,8 +38,10 @@ public class PostService {
                 ? imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE)
                 : null;
 
-        Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, image));
-        postStatRepository.save(new PostStat(savePost.getId()));
+        Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, image)); // 바로 flush 해야 참조 무결성 유지
+        log.info("PostService에서 post save 완료");
+        postStatService.savePostStat(savePost); // 지연 쓰기로 인해 log 모두 출력 후 post_stat insert (flush) 실행
+        log.info("PostService에서 PostStat save 완료");
     }
 
     @Transactional(readOnly = true)
@@ -46,11 +49,12 @@ public class PostService {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
 
-        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> createPostStat(postId));
         boolean isLiked = memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 
+        PostStat postStat = postStatService.findPostStat(post);
+        // FIXME: @Transactional(readOnly = true)이므로 dirty checking 안 됨 -> DB 반영 X
         postStat.incrementViewCount();
-        postStatRepository.save(postStat);
+        log.info("postStat.getViewCount = {}", postStat.getViewCount());
 
         return PostResponseDto.of(post, isLiked, postStat);
     }
@@ -62,9 +66,12 @@ public class PostService {
                 ? postRepository.findByIsDeletedFalseOrderByIdDesc(pageable)
                 : postRepository.findByIsDeletedFalseAndIdLessThanOrderByIdDesc(lastPostId, pageable);
 
-        return posts.stream().map(x -> PostResponseDto.of(x,
-                memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(x.getId(), currentMemberId),
-                postStatRepository.findById(x.getId()).orElseGet(() -> createPostStat(x.getId())))).toList();
+        return posts.stream().map(
+                x -> PostResponseDto.of(
+                        x,
+                        memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(x.getId(), currentMemberId),
+                        postStatService.findPostStat(x)))
+                .toList();
     }
 
     public void modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
@@ -119,11 +126,5 @@ public class PostService {
         LocalDateTime convertedAfter = after != null ? after.atStartOfDay() : null;
 
         return postRepository.deleteAllByIsDeletedTrueAndDynamicFilters(memberId, convertedBefore, convertedAfter);
-    }
-
-    private PostStat createPostStat(Integer postId) {
-        int likeCount = memberPostLikeRepository.countByMemberPostLikeIdPostId(postId);
-        int commentCount = commentRepository.countByPostId(postId);
-        return new PostStat(postId, likeCount, commentCount);
     }
 }
