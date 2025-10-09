@@ -23,7 +23,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final PostAdditionalRepository postAdditionalRepository;
     private final PostStatRepository postStatRepository;
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final MemberRepository memberRepository;
@@ -38,7 +37,8 @@ public class PostService {
                 ? imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE)
                 : null;
 
-        savePost(new Post(dto.getTitle(), dto.getContent(), member, image));
+        Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, image));
+        postStatRepository.save(new PostStat(savePost.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -46,7 +46,7 @@ public class PostService {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
 
-        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> findPostStat(postId));
+        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> createPostStat(postId));
         boolean isLiked = memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 
         postStat.incrementViewCount();
@@ -64,7 +64,7 @@ public class PostService {
 
         return posts.stream().map(x -> PostResponseDto.of(x,
                 memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(x.getId(), currentMemberId),
-                postStatRepository.findById(x.getId()).orElseGet(() -> findPostStat(x.getId())))).toList();
+                postStatRepository.findById(x.getId()).orElseGet(() -> createPostStat(x.getId())))).toList();
     }
 
     public void modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
@@ -121,16 +121,9 @@ public class PostService {
         return postRepository.deleteAllByIsDeletedTrueAndDynamicFilters(memberId, convertedBefore, convertedAfter);
     }
 
-    private void savePost(Post post) {
-        Post savePost = postRepository.save(post);
-        postAdditionalRepository.save(new PostAdditional(savePost));
-        postStatRepository.save(new PostStat(savePost.getId()));
-    }
-
-    private PostStat findPostStat(Integer postId) {
-        int viewCount = postAdditionalRepository.findViewCountByPostId(postId);
+    private PostStat createPostStat(Integer postId) {
         int likeCount = memberPostLikeRepository.countByMemberPostLikeIdPostId(postId);
         int commentCount = commentRepository.countByPostId(postId);
-        return new PostStat(postId, viewCount, likeCount, commentCount);
+        return new PostStat(postId, likeCount, commentCount);
     }
 }

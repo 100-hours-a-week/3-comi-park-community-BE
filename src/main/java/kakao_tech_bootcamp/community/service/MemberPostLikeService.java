@@ -18,7 +18,6 @@ public class MemberPostLikeService {
     private final MemberPostLikeRepository likeRepository;
     private final PostStatRepository postStatRepository;
     private final PostRepository postRepository;
-    private final PostAdditionalRepository postAdditionalRepository;
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final CommentRepository commentRepository;
 
@@ -35,7 +34,7 @@ public class MemberPostLikeService {
 
         likeRepository.save(new MemberPostLike(postId, currentMemberId));
 
-        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> findPostStat(postId));
+        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> createPostStat(postId));
         postStat.incrementLikeCount();
         postStatRepository.save(postStat);
 
@@ -55,7 +54,7 @@ public class MemberPostLikeService {
 
         likeRepository.deleteById(new MemberPostLikeId(postId, currentMemberId));
 
-        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> findPostStat(postId));
+        PostStat postStat = postStatRepository.findById(postId).orElseGet(() -> createPostStat(postId));
         postStat.decrementLikeCount();
         postStatRepository.save(postStat);
 
@@ -63,10 +62,9 @@ public class MemberPostLikeService {
     }
 
     // TODO: PostService와 중복 메서드. PostStatService 따로 빼내야 할 듯
-    private PostStat findPostStat(Integer postId) {
-        int viewCount = postAdditionalRepository.findViewCountByPostId(postId);
+    private PostStat createPostStat(Integer postId) {
         int likeCount = memberPostLikeRepository.countByMemberPostLikeIdPostId(postId);
         int commentCount = commentRepository.countByPostId(postId);
-        return new PostStat(postId, viewCount, likeCount, commentCount);
+        return new PostStat(postId, likeCount, commentCount);
     }
 }
