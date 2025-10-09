@@ -30,12 +30,12 @@ public class PostStat {
     @ColumnDefault("0")
     private int commentCount;
 
-    public PostStat(Integer postId) {
-        this.postId = postId;
+    public PostStat(Post post) {
+        this.post = post;
     }
 
-    public PostStat(Integer postId, int likeCount, int commentCount) {
-        this.postId = postId;
+    public PostStat(Post post, int likeCount, int commentCount) {
+        this.post = post;
         this.likeCount = likeCount;
         this.commentCount = commentCount;
     }
