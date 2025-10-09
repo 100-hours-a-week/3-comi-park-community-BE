@@ -51,10 +51,10 @@ public class PostService {
 
         boolean isLiked = memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 
-        PostStat postStat = postStatService.findPostStat(post);
+        PostStat postStat = postStatService.findPostStat(post)
+                .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
         // FIXME: @Transactional(readOnly = true)이므로 dirty checking 안 됨 -> DB 반영 X
         postStat.incrementViewCount();
-        log.info("postStat.getViewCount = {}", postStat.getViewCount());
 
         return PostResponseDto.of(post, isLiked, postStat);
     }
@@ -70,7 +70,9 @@ public class PostService {
                 x -> PostResponseDto.of(
                         x,
                         memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(x.getId(), currentMemberId),
-                        postStatService.findPostStat(x)))
+                        postStatService.findPostStat(x).orElseGet(
+                                () -> postStatService.savePostStatInitializedByCount(x)
+                        )))
                 .toList();
     }
 

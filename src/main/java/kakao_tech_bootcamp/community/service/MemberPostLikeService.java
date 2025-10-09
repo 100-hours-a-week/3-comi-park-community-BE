@@ -30,7 +30,8 @@ public class MemberPostLikeService {
             throw new ConflictException("회원이 이미 좋아요한 게시글입니다");
         }
 
-        PostStat postStat = postStatService.findPostStat(post);
+        PostStat postStat = postStatService.findPostStat(post)
+                .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
         postStat.incrementLikeCount();
 
         likeRepository.save(new MemberPostLike(postId, currentMemberId));
@@ -48,7 +49,8 @@ public class MemberPostLikeService {
             throw new NotFoundException("좋아요를 찾을 수 없습니다");
         }
 
-        PostStat postStat = postStatService.findPostStat(post);
+        PostStat postStat = postStatService.findPostStat(post)
+                .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
         postStat.decrementLikeCount();
 
         likeRepository.deleteById(new MemberPostLikeId(postId, currentMemberId));
