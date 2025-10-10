@@ -13,10 +13,10 @@ public class ImageReferenceDto {
     private String objectKey;
 
     public static ImageReferenceDto of(Image image) {
-        return image != null ? new ImageReferenceDto(image.getId(), image.getObjectKey()) : new ImageReferenceDto();
+        return image != null ? new ImageReferenceDto(image.getId(), image.getObjectKey()) : null;
     }
 
     public static ImageReferenceDto of(Integer id, String objectKey) {
-        return new ImageReferenceDto(id, objectKey);
+        return id != null && objectKey != null ? new ImageReferenceDto(id, objectKey) : null;
     }
 }
