@@ -47,12 +47,7 @@ public class ImageService {
         destination.getParentFile().mkdirs();
         file.transferTo(destination);
 
-        ImageResponseDto imageResponseDto = new ImageResponseDto();
-        imageResponseDto.setId(saveImage.getId());
-        imageResponseDto.setObjectKey(objectKey);
-        imageResponseDto.setFilename(filename);
-
-        return imageResponseDto;
+        return ImageResponseDto.of(image);
     }
 
     public Image modifyImageStatusById(Integer imageId, ImageStatus imageStatus) {
