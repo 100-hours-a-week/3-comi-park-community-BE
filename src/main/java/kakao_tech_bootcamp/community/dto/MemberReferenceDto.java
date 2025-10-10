@@ -13,4 +13,8 @@ public class MemberReferenceDto {
     public static MemberReferenceDto of(Member member) {
         return new MemberReferenceDto(member.getNickname(), ImageReferenceDto.of(member.getImage()));
     }
+
+    public static MemberReferenceDto of(String nickname, Integer imageId, String imageObjectKey) {
+        return new MemberReferenceDto(nickname, ImageReferenceDto.of(imageId, imageObjectKey));
+    }
 }

@@ -2,6 +2,7 @@ package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
+import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
 import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.PostResponseDto;
 import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
@@ -9,8 +10,6 @@ import kakao_tech_bootcamp.community.entity.*;
 import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,20 +58,9 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
-        Pageable pageable = PageRequest.of(0, limit);
-        List<Post> posts = lastPostId == null
-                ? postRepository.findByIsDeletedFalseOrderByIdDesc(pageable)
-                : postRepository.findByIsDeletedFalseAndIdLessThanOrderByIdDesc(lastPostId, pageable);
-
-        return posts.stream().map(
-                x -> PostResponseDto.of(
-                        x,
-                        memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(x.getId(), currentMemberId),
-                        postStatService.findPostStat(x).orElseGet(
-                                () -> postStatService.savePostStatInitializedByCount(x)
-                        )))
-                .toList();
+    public List<PostAllResponseDto> findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
+        return postRepository.findAllIdLessThanCustom(currentMemberId, lastPostId, limit)
+                .stream().map(PostAllResponseDto::of).toList();
     }
 
     public void modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {

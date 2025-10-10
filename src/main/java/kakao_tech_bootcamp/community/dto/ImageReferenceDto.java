@@ -15,4 +15,8 @@ public class ImageReferenceDto {
     public static ImageReferenceDto of(Image image) {
         return image != null ? new ImageReferenceDto(image.getId(), image.getObjectKey()) : new ImageReferenceDto();
     }
+
+    public static ImageReferenceDto of(Integer id, String objectKey) {
+        return new ImageReferenceDto(id, objectKey);
+    }
 }
