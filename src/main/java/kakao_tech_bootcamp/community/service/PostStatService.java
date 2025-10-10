@@ -64,6 +64,10 @@ public class PostStatService {
 
     public int decrementLikeCount(PostStat postStat) {
         postStatAsyncService.asyncDecrementLikeCount(postStat.getPostId());
+        /*
+         비동기 타이밍에 따라 좋아요 개수가 -1로 반환될 수 있지만 실제 DB에서는 0임
+         새로고침하면 정상적으로 바뀜 (좋아요 개수는 eventual consistency)
+         */
         return postStat.getLikeCount() - 1;
     }
 
