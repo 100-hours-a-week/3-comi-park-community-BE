@@ -1,56 +1,35 @@
 package kakao_tech_bootcamp.community.repository;
 
 import kakao_tech_bootcamp.community.entity.PostStat;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
 @Repository
-public class PostStatRepository {
+public interface PostStatRepository extends JpaRepository<PostStat, Integer> {
     /*
-     게시글 관련 통계 데이터(조회수, 좋아요수, 댓글수)를 관리하는 Redis 등의 캐시용 인메모리 DB
+     @Modifying이라면 1차 캐시를 지워 영속성 컨텍스트와 DB 상태 불일치 제거 위해 clearAutomatically = true 필요하지만
+     비동기 메서드 (asyncIncrementViewCount)에서만 실행되므로 해당 옵션 필요 X (영속성 컨텍스트는 트랜잭션마다 존재)
      */
-    private Map<Integer, PostStat> store = new ConcurrentHashMap<>();
+    @Modifying
+    @Query("update PostStat ps set ps.viewCount = ps.viewCount + 1 where ps.postId = :postId")
+    void incrementViewCountById(@Param("postId") Integer postId);
 
-    public void save(PostStat postStat) {
-        store.put(postStat.getPostId(), postStat);
-    }
+    @Modifying
+    @Query("update PostStat ps set ps.likeCount = ps.likeCount + 1 where ps.postId = :postId")
+    void incrementLikeCountById(@Param("postId") Integer postId);
 
-    public Optional<PostStat> findById(Integer postId) {
-        return Optional.ofNullable(store.get(postId));
-    }
+    @Modifying
+    @Query("update PostStat ps set ps.likeCount = ps.likeCount - 1 where ps.postId = :postId")
+    void decrementLikeCountById(@Param("postId") Integer postId);
 
-    public void incrementViewCount(Integer postId) {
-        Optional.ofNullable(store.get(postId)).ifPresent(PostStat::incrementViewCount);
-    }
+    @Modifying
+    @Query("update PostStat ps set ps.commentCount = ps.commentCount + 1 where ps.postId = :postId")
+    void incrementCommentCountById(@Param("postId") Integer postId);
 
-    public void incrementLikeCount(Integer postId) {
-        Optional.ofNullable(store.get(postId)).ifPresent(PostStat::incrementLikeCount);
-    }
-
-    public void decrementLikeCount(Integer postId) {
-        Optional.ofNullable(store.get(postId)).ifPresent(PostStat::decrementLikeCount);
-    }
-
-    public void incrementCommentCount(Integer postId) {
-        Optional.ofNullable(store.get(postId)).ifPresent(PostStat::incrementCommentCount);
-    }
-
-    public void decrementCommentCount(Integer postId) {
-        Optional.ofNullable(store.get(postId)).ifPresent(PostStat::decrementCommentCount);
-    }
-
-    public void updateLikeCount(Integer postId, int likeCount) {
-        Optional.ofNullable(store.get(postId)).ifPresent(x -> x.changeLikeCount(likeCount));
-    }
-
-    public void updateCommentCount(Integer postId, int commentCount) {
-        Optional.ofNullable(store.get(postId)).ifPresent(x -> x.changeCommentCount(commentCount));
-    }
-
-    public void deleteById(Integer postId) {
-        store.remove(postId);
-    }
+    @Modifying
+    @Query("update PostStat ps set ps.commentCount = ps.commentCount - 1 where ps.postId = :postId")
+    void decrementCommentCountById(@Param("postId") Integer postId);
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -42,6 +43,13 @@ public class Post {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     public Post(String title, String content, Member member, Image image) {
         this.title = title;
         this.content = content;
@@ -63,5 +71,6 @@ public class Post {
 
     public void markDeleted() {
         isDeleted = true;
+        deletedAt = LocalDateTime.now();
     }
 }

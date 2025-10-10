@@ -7,6 +7,7 @@ import kakao_tech_bootcamp.community.dto.CommentResponseDto;
 import kakao_tech_bootcamp.community.entity.Comment;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.entity.Post;
+import kakao_tech_bootcamp.community.entity.PostStat;
 import kakao_tech_bootcamp.community.repository.CommentRepository;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
 import kakao_tech_bootcamp.community.repository.PostRepository;
@@ -27,11 +28,17 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final PostStatService postStatService;
 
     public CommentResponseDto saveComment(Integer currentMemberId, Integer postId, CommentRequestDto dto) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
         Member member = memberRepository.findById(currentMemberId).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
         Comment comment = commentRepository.save(new Comment(post, member, dto.getContent()));
+
+        PostStat postStat = postStatService.findPostStat(post)
+                .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
+        postStatService.incrementCommentCount(postStat);
+
         return CommentResponseDto.of(comment);
     }
 
@@ -61,12 +68,16 @@ public class CommentService {
     }
 
     public void removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
-        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
 
         if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
             throw new ForbiddenException("댓글을 작성한 회원만 삭제할 수 있습니다");
         }
+
+        PostStat postStat = postStatService.findPostStat(post)
+                .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
+        postStatService.decrementCommentCount(postStat);
 
         commentRepository.delete(comment);
     }
