@@ -22,12 +22,12 @@ public class MemberPostLikeController {
         int likeCount = likeService.saveLike(authInfo.getId(), postId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ApiResponse<>("like_create_success", Map.of("likeCount", likeCount)));
+                .body(new ApiResponse<>("create_success", Map.of("likeCount", likeCount)));
     }
 
     @DeleteMapping
     public ResponseEntity<ApiResponse<Map<String, Integer>>> removeLike(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
         int likeCount = likeService.removeLike(authInfo.getId(), postId);
-        return ResponseEntity.ok(new ApiResponse<>("like_delete_success", Map.of("likeCount", likeCount)));
+        return ResponseEntity.ok(new ApiResponse<>("delete_success", Map.of("likeCount", likeCount)));
     }
 }
