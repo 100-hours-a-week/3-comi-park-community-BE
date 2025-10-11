@@ -26,7 +26,7 @@ public class CommentController {
                                                    @PathVariable Integer postId,
                                                    @RequestBody @Validated CommentRequestDto commentRequestDto) {
         CommentResponseDto comment = commentService.saveComment(authInfo.getId(), postId, commentRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("comment_create_success", Map.of("comment", comment)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("create_success", Map.of("comment", comment)));
     }
 
     @GetMapping
@@ -42,8 +42,8 @@ public class CommentController {
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId,
                                                      @RequestBody @Validated CommentRequestDto commentRequestDto) {
-        Map<String, Object> modifiedFiles = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
-        return ResponseEntity.ok(new ApiResponse<>("ok", modifiedFiles));
+        Map<String, Object> changes = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
+        return ResponseEntity.ok(new ApiResponse<>("modify_success", changes));
     }
 
     @DeleteMapping("/{commentId}")

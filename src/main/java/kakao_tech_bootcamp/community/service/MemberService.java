@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -44,7 +46,7 @@ public class MemberService {
         }
     }
 
-    public void saveMember(MemberCreateRequestDto dto) {
+    public MemberResponseDto saveMember(MemberCreateRequestDto dto) {
         if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
             throw new BadRequestException("비밀번호가 일치하지 않습니다");
         }
@@ -64,7 +66,7 @@ public class MemberService {
         String encoded = passwordEncoder.encode(dto.getPassword());
         Member member = new Member(dto.getEmail(), encoded, dto.getNickname(), image);
 
-        memberRepository.save(member);
+        return MemberResponseDto.of(memberRepository.save(member));
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +75,7 @@ public class MemberService {
         return MemberResponseDto.of(member);
     }
 
-    public void modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
+    public Map<String, Object> modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
         if (!Objects.equals(currentMemberId, id)) {
             throw new ForbiddenException("회원 본인 정보에 대해서만 수정할 수 있습니다");
         }
@@ -81,9 +83,7 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
-        if (dto.getNickname() != null) {
-            member.changeNickname(dto.getNickname());
-        }
+        Map<String, Object> changes = new HashMap<>();
 
         if (dto.getPassword() != null) {
             if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
@@ -91,6 +91,12 @@ public class MemberService {
             }
 
             member.changePassword(passwordEncoder.encode(dto.getPassword()));
+            changes.put("passwordChanged", true);
+        }
+
+        if (dto.getNickname() != null) {
+            member.changeNickname(dto.getNickname());
+            changes.put("nickname", member.getNickname());
         }
 
         /*
@@ -102,6 +108,8 @@ public class MemberService {
             Image previousImage = member.getImage();
             member.changeImage(null);
             imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+
+            changes.put("image", member.getImage());
         }
 
         if (dto.getImage() != null) {
@@ -118,7 +126,11 @@ public class MemberService {
             if (previousImage != null) {
                 imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
             }
+
+            changes.put("image", ImageResponseDto.of(member.getImage()));
         }
+
+        return changes;
     }
 
     public void removeMember(Integer currentMemberId, Integer id) {

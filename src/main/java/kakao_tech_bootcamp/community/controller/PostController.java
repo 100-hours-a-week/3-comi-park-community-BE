@@ -25,10 +25,10 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> savePost(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, PostResponseDto>>> savePost(@CurrentMember AuthInfo authInfo,
                                                 @RequestBody PostCreateRequestDto postCreateRequestDto) {
-        postService.savePost(authInfo.getId(), postCreateRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("post_create_success", null));
+        PostResponseDto post = postService.savePost(authInfo.getId(), postCreateRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("create_success", Map.of("post", post)));
     }
 
     @GetMapping
@@ -46,11 +46,11 @@ public class PostController {
     }
 
     @PatchMapping("/{postId}")
-    public ResponseEntity<Void> modifyPost(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, Object>>> modifyPost(@CurrentMember AuthInfo authInfo,
                                                   @PathVariable Integer postId,
                                                   @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
-        postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        Map<String, Object> changes = postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("modify_success", changes));
     }
 
     @DeleteMapping

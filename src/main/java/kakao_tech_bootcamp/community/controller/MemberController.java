@@ -36,9 +36,9 @@ public class MemberController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> saveMember(@RequestBody @Validated MemberCreateRequestDto memberCreateRequestDto) {
-        memberService.saveMember(memberCreateRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("register_success", null));
+    public ResponseEntity<ApiResponse<Map<String, MemberResponseDto>>> saveMember(@RequestBody @Validated MemberCreateRequestDto memberCreateRequestDto) {
+        MemberResponseDto member = memberService.saveMember(memberCreateRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("create_success", Map.of("member", member)));
     }
 
     @GetMapping("/{memberId}")
@@ -48,11 +48,11 @@ public class MemberController {
     }
 
     @PatchMapping("/{memberId}")
-    public ResponseEntity<Void> modifyMember(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, Object>>> modifyMember(@CurrentMember AuthInfo authInfo,
                                        @PathVariable Integer memberId,
                                        @RequestBody @Validated MemberUpdateRequestDto updateMemberRequestDto) {
-        memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        Map<String, Object> changes = memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("modify_success", changes));
     }
 
     @DeleteMapping("/{memberId}")
