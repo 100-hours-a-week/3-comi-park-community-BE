@@ -28,4 +28,10 @@ public class PostResponseDto {
                 post.getCreatedAt(), isLiked,
                 postStat.getViewCount(), postStat.getLikeCount(), postStat.getCommentCount());
     }
+
+    public static PostResponseDto of(Post post) {
+        return new PostResponseDto(post.getId(), post.getTitle(), post.getContent(),
+                MemberReferenceDto.of(post.getMember()), ImageReferenceDto.of(post.getImage()),
+                post.getCreatedAt(), false, 0, 0, 0);
+    }
 }

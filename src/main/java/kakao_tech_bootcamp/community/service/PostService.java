@@ -9,16 +9,16 @@ import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
 import kakao_tech_bootcamp.community.entity.*;
 import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-@Log4j2
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -29,7 +29,7 @@ public class PostService {
     private final ImageService imageService;
     private final PostStatService postStatService;
 
-    public void savePost(Integer currentMemberId, PostCreateRequestDto dto) {
+    public PostResponseDto savePost(Integer currentMemberId, PostCreateRequestDto dto) {
         Member member = memberRepository.findById(currentMemberId)
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -38,9 +38,9 @@ public class PostService {
                 : null;
 
         Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, image)); // 바로 flush 해야 참조 무결성 유지
-        log.info("PostService에서 post save 완료");
         postStatService.savePostStat(savePost); // 지연 쓰기로 인해 log 모두 출력 후 post_stat insert (flush) 실행
-        log.info("PostService에서 PostStat save 완료");
+
+        return PostResponseDto.of(savePost);
     }
 
     @Transactional(readOnly = true)
@@ -62,24 +62,29 @@ public class PostService {
         return postRepository.findAllIdLessThanCustom(currentMemberId, lastPostId, limit);
     }
 
-    public void modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
+    public Map<String, Object> modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
 
         if (!Objects.equals(post.getMember().getId(), currentMemberId)) {
             throw new ForbiddenException("게시글을 작성한 회원만 수정할 수 있습니다");
         }
 
+        Map<String, Object> changes = new HashMap<>();
+
         if (dto.getPostDeleted()) {
             post.markDeleted(); // 관련 이미지 상태는 여전히 ACTIVE (배치 프로그램에 의해 삭제되지 않도록)
-            return; // soft delete 요청 시 그 외 게시글 수정 무시
+            changes.put("postDeleted", true);
+            return changes; // soft delete 요청 시 그 외 게시글 수정 무시
         }
 
         if (dto.getTitle() != null) {
             post.changeTitle(dto.getTitle());
+            changes.put("title", post.getTitle());
         }
 
         if (dto.getContent() != null) {
             post.changeContent(dto.getContent());
+            changes.put("content", post.getContent());
         }
 
         /*
@@ -90,6 +95,8 @@ public class PostService {
             Image previousImage = post.getImage();
             post.changeImage(null);
             imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+
+            changes.put("image", post.getImage());
         }
 
         if (dto.getImage() != null) {
@@ -101,7 +108,11 @@ public class PostService {
             if (previousImage != null) {
                 imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
             }
+
+            changes.put("image", post.getImage());
         }
+
+        return changes;
     }
 
     public long removePosts(LocalDate before, LocalDate after, Integer memberId) {
