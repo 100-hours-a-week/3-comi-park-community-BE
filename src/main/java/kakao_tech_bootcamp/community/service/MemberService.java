@@ -82,7 +82,7 @@ public class MemberService {
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
         if (dto.getNickname() != null) {
-            member.setNickname(dto.getNickname());
+            member.changeNickname(dto.getNickname());
         }
 
         if (dto.getPassword() != null) {
@@ -90,7 +90,7 @@ public class MemberService {
                 throw new BadRequestException("비밀번호가 일치하지 않습니다");
             }
 
-            member.setPassword(passwordEncoder.encode(dto.getPassword()));
+            member.changePassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         /*
@@ -100,7 +100,7 @@ public class MemberService {
          */
         if (dto.getImageDeleted() && dto.getImage() == null && member.getImage() != null) {
             Image previousImage = member.getImage();
-            member.setImage(null);
+            member.changeImage(null);
             imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
         }
 
@@ -108,7 +108,7 @@ public class MemberService {
             Image previousImage = member.getImage();
 
             Image currentImage = imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE);
-            member.setImage(currentImage);
+            member.changeImage(currentImage);
 
             /*
              removeImage()에는 데이터베이스뿐만 아니라 물리적인 이미지 파일 삭제까지 포함되어 있음

@@ -47,18 +47,13 @@ public class ImageService {
         destination.getParentFile().mkdirs();
         file.transferTo(destination);
 
-        ImageResponseDto imageResponseDto = new ImageResponseDto();
-        imageResponseDto.setId(saveImage.getId());
-        imageResponseDto.setObjectKey(objectKey);
-        imageResponseDto.setFilename(filename);
-
-        return imageResponseDto;
+        return ImageResponseDto.of(image);
     }
 
     public Image modifyImageStatusById(Integer imageId, ImageStatus imageStatus) {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new NotFoundException("이미지를 찾을 수 없습니다"));
-        image.setStatus(imageStatus);
+        image.changeStatus(imageStatus);
         // TODO: 엔티티 말고 dto를 반환할 방법?
         return image;
     }

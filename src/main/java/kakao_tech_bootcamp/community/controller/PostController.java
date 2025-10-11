@@ -2,6 +2,7 @@ package kakao_tech_bootcamp.community.controller;
 
 import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
+import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
 import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.PostResponseDto;
 import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
@@ -31,10 +32,10 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Map<String, List<PostResponseDto>>>> findPosts(@CurrentMember AuthInfo authInfo,
-                                                 @RequestParam(value = "lastPostId", required = false) Integer lastPostId,
-                                                 @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
-        List<PostResponseDto> posts = postService.findPosts(authInfo.getId(), lastPostId, limit);
+    public ResponseEntity<ApiResponse<Map<String, List<PostAllResponseDto>>>> findPosts(@CurrentMember AuthInfo authInfo,
+                                                                                        @RequestParam(value = "lastPostId", required = false) Integer lastPostId,
+                                                                                        @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
+        List<PostAllResponseDto> posts = postService.findPosts(authInfo.getId(), lastPostId, limit);
         return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("posts", posts)));
     }
 
