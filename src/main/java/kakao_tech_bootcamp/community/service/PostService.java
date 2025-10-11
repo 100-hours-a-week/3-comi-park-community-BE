@@ -59,8 +59,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<PostAllResponseDto> findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
-        return postRepository.findAllIdLessThanCustom(currentMemberId, lastPostId, limit)
-                .stream().map(PostAllResponseDto::of).toList();
+        return postRepository.findAllIdLessThanCustom(currentMemberId, lastPostId, limit);
     }
 
     public void modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
