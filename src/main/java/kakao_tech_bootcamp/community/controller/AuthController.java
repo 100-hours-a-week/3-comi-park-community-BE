@@ -3,7 +3,7 @@ package kakao_tech_bootcamp.community.controller;
 import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.service.AuthStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +14,9 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
     private final AuthStrategy authStrategy;
-
-    @Autowired
-    public AuthController(AuthStrategy authStrategy) {
-        this.authStrategy = authStrategy;
-    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> logout(@RequestBody @Validated AuthRequestDto authRequestDto) {

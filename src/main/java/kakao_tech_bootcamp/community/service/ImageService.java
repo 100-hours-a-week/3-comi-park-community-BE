@@ -6,7 +6,7 @@ import kakao_tech_bootcamp.community.dto.ImageResponseDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.repository.ImageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ImageService {
     private final static List<String> AVAILABLE_EXTENSIONS = List.of("png", "jpg", "jpeg", "png", "webp", "heic", "heif");
     private final static String REGEX = ".([a-zA-Z]+)$";
@@ -29,11 +30,6 @@ public class ImageService {
     @Value("${storage.domain}")
     private String domain; // S3 사용한다고 가정해 dirPath 대신 domain 이름 설정
     private final ImageRepository imageRepository;
-
-    @Autowired
-    public ImageService(ImageRepository imageRepository) {
-        this.imageRepository = imageRepository;
-    }
 
     public ImageResponseDto saveImage(String type, MultipartFile file) throws IOException{
         String filename = file.getOriginalFilename();

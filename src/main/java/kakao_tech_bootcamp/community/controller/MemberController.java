@@ -5,7 +5,7 @@ import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.*;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.MemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,13 +15,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/members")
+@RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
-
-    @Autowired
-    public MemberController(MemberService memberService) {
-        this.memberService = memberService;
-    }
 
     @PostMapping("/availability/email")
     public ResponseEntity<ApiResponse<Void>> isAvailableEmail(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {

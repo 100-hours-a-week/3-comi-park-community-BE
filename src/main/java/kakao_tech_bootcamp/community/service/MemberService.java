@@ -9,7 +9,7 @@ import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,17 +20,11 @@ import java.util.Objects;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
     private final ImageService imageService;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public MemberService(MemberRepository memberRepository, ImageService imageService, PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.imageService = imageService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Transactional(readOnly = true)
     public void existsByEmail(MemberAvailabilityDto memberAvailabilityDto) {

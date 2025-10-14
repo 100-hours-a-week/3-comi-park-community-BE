@@ -6,29 +6,22 @@ import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.SessionRepository;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthSessionStrategy implements AuthStrategy {
     private final static int SESSION_LIMIT = 5;
 
     private final SessionRepository sessionRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public AuthSessionStrategy(SessionRepository sessionRepository, MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
-        this.sessionRepository = sessionRepository;
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public String issue(AuthRequestDto dto) {
