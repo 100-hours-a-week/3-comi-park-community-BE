@@ -43,6 +43,13 @@ public class PostService {
         return PostResponseDto.of(savePost);
     }
 
+    /**
+     * 게시글 정보와 게시글 통계 정보(조회수, 좋아요 수, 댓글 수), 조회자의 좋아요 여부를 반환합니다.
+     * 단, 데이터베이스에 통계 정보가 없으면 새로운 트랜잭션을 열어서 post_stat 테이블에 통계 정보를 저장한 후에 반환합니다.
+     * @param currentMemberId
+     * @param postId
+     * @return
+     */
     @Transactional(readOnly = true)
     public PostResponseDto findPost(Integer currentMemberId, Integer postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId)

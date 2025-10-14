@@ -5,7 +5,7 @@ import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.*;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.MemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,36 +15,32 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/members")
+@RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
-
-    @Autowired
-    public MemberController(MemberService memberService) {
-        this.memberService = memberService;
-    }
 
     @PostMapping("/availability/email")
     public ResponseEntity<ApiResponse<Void>> isAvailableEmail(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
         memberService.existsByEmail(memberAvailabilityDto);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", null));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
     }
 
     @PostMapping("/availability/nickname")
     public ResponseEntity<ApiResponse<Void>> isAvailableNickname(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
         memberService.existsByNickname(memberAvailabilityDto);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", null));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<Map<String, MemberResponseDto>>> saveMember(@RequestBody @Validated MemberCreateRequestDto memberCreateRequestDto) {
         MemberResponseDto member = memberService.saveMember(memberCreateRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("create_success", Map.of("member", member)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("member", member)));
     }
 
     @GetMapping("/{memberId}")
     public ResponseEntity<ApiResponse<Map<String, MemberResponseDto>>> findMember(@PathVariable Integer memberId) {
         MemberResponseDto member = memberService.findMember(memberId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("ok", Map.of("member", member)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("member", member)));
     }
 
     @PatchMapping("/{memberId}")
@@ -52,7 +48,7 @@ public class MemberController {
                                        @PathVariable Integer memberId,
                                        @RequestBody @Validated MemberUpdateRequestDto updateMemberRequestDto) {
         Map<String, Object> changes = memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("modify_success", changes));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.modified(changes));
     }
 
     @DeleteMapping("/{memberId}")

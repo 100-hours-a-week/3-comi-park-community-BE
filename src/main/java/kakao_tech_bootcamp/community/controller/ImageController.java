@@ -5,7 +5,7 @@ import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.ImageResponseDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.ImageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,26 +16,20 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/images")
+@RequiredArgsConstructor
 public class ImageController {
     private final ImageService imageService;
-
-    @Autowired
-    public ImageController(ImageService localImageService) {
-        this.imageService = localImageService;
-    }
 
     @PostMapping("/members")
     public ResponseEntity<ApiResponse<Map<String, ImageResponseDto>>> saveMemberImage(@RequestParam("file") MultipartFile file) throws IOException {
         ImageResponseDto imageResponseDto = imageService.saveImage("members", file);
-        Map<String, ImageResponseDto> data = Map.of("image", imageResponseDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("upload_success", data));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("image", imageResponseDto)));
     }
 
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse<Map<String, ImageResponseDto>>> savePostImage(@CurrentMember AuthInfo authInfo,
                                                                                     @RequestParam("file") MultipartFile file) throws IOException {
         ImageResponseDto imageResponseDto = imageService.saveImage("posts", file);
-        Map<String, ImageResponseDto> data = Map.of("image", imageResponseDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("upload_success", data));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("image", imageResponseDto)));
     }
 }

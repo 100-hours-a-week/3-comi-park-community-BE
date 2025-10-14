@@ -39,6 +39,11 @@ public class PostStatService {
         postStatRepository.save(new PostStat(post));
     }
 
+    /**
+     * 새로운 트랜잭션을 열여서 MemberPostLike 테이블, Comment 테이블에서 직접 count 연산 후 PostStat 저장 후 반환합니다.
+     * @param post
+     * @return PostStat
+     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PostStat savePostStatInitializedByCount(Post post) {
         int likeCount = memberPostLikeRepository.countByMemberPostLikeIdPostId(post.getId());
