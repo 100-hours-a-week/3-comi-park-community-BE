@@ -28,7 +28,7 @@ public class AuthController {
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(SET_COOKIE, cookie.toString())
-                .body(new ApiResponse<>("auth_success", null));
+                .body(ApiResponse.success());
     }
 
     @DeleteMapping

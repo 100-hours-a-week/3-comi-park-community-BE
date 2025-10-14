@@ -14,31 +14,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<List<String>>> methodArgumentNotValidException(MethodArgumentNotValidException e) {
         List<String> errors = e.getFieldErrors().stream().map(fieldError -> fieldError.getDefaultMessage()).toList();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("invalid_request", errors));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.badRequest(errors));
     }
 
     @ExceptionHandler(value = BadRequestException.class)
     public ResponseEntity<ApiResponse<String>> badRequestException(BadRequestException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("invalid_request", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.badRequest(e.getMessage()));
     }
 
     @ExceptionHandler(value = UnauthorizedException.class)
     public ResponseEntity<ApiResponse<String>> unauthorizedException(UnauthorizedException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("not_authenticated", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.unauthorized(e.getMessage()));
     }
 
     @ExceptionHandler(value = ForbiddenException.class)
     public ResponseEntity<ApiResponse<String>> forbiddenException(ForbiddenException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>("not_authorized", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.forbidden(e.getMessage()));
     }
 
     @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<ApiResponse<String>> notFoundException(NotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>("not_found", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.notFound(e.getMessage()));
     }
 
     @ExceptionHandler(value = ConflictException.class)
     public ResponseEntity<ApiResponse<String>> conflictException(ConflictException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>("conflict_request", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.conflict(e.getMessage()));
     }
 }

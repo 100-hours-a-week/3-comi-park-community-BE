@@ -23,15 +23,13 @@ public class ImageController {
     @PostMapping("/members")
     public ResponseEntity<ApiResponse<Map<String, ImageResponseDto>>> saveMemberImage(@RequestParam("file") MultipartFile file) throws IOException {
         ImageResponseDto imageResponseDto = imageService.saveImage("members", file);
-        Map<String, ImageResponseDto> data = Map.of("image", imageResponseDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("upload_success", data));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("image", imageResponseDto)));
     }
 
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse<Map<String, ImageResponseDto>>> savePostImage(@CurrentMember AuthInfo authInfo,
                                                                                     @RequestParam("file") MultipartFile file) throws IOException {
         ImageResponseDto imageResponseDto = imageService.saveImage("posts", file);
-        Map<String, ImageResponseDto> data = Map.of("image", imageResponseDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("upload_success", data));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("image", imageResponseDto)));
     }
 }

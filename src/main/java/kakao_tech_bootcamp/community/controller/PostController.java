@@ -28,7 +28,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<Map<String, PostResponseDto>>> savePost(@CurrentMember AuthInfo authInfo,
                                                 @RequestBody PostCreateRequestDto postCreateRequestDto) {
         PostResponseDto post = postService.savePost(authInfo.getId(), postCreateRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("create_success", Map.of("post", post)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("post", post)));
     }
 
     @GetMapping
@@ -36,13 +36,13 @@ public class PostController {
                                                                                         @RequestParam(value = "lastPostId", required = false) Integer lastPostId,
                                                                                         @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
         List<PostAllResponseDto> posts = postService.findPosts(authInfo.getId(), lastPostId, limit);
-        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("posts", posts)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("posts", posts)));
     }
 
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<Map<String, PostResponseDto>>> findPost(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
         PostResponseDto post = postService.findPost(authInfo.getId(), postId);
-        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("post", post)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("post", post)));
     }
 
     @PatchMapping("/{postId}")
@@ -50,7 +50,7 @@ public class PostController {
                                                   @PathVariable Integer postId,
                                                   @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
         Map<String, Object> changes = postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("modify_success", changes));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.modified(changes));
     }
 
     @DeleteMapping
@@ -60,6 +60,6 @@ public class PostController {
                                       @RequestParam(value = "writer", required = false) Integer memberId) {
         // TODO: 회원 권한 확인 필요
         long affectedRows = postService.removePosts(before, after, memberId);
-        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("affectedRows", affectedRows)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.removed(Map.of("affectedRows", affectedRows)));
     }
 }

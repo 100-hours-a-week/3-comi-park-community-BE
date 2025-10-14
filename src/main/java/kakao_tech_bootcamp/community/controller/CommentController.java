@@ -26,7 +26,7 @@ public class CommentController {
                                                    @PathVariable Integer postId,
                                                    @RequestBody @Validated CommentRequestDto commentRequestDto) {
         CommentResponseDto comment = commentService.saveComment(authInfo.getId(), postId, commentRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("create_success", Map.of("comment", comment)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("comment", comment)));
     }
 
     @GetMapping
@@ -34,7 +34,7 @@ public class CommentController {
                                                    @RequestParam(value = "lastCommentId", required = false) Integer lastCommentId,
                                                    @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
         List<CommentResponseDto> comments = commentService.findComments(postId, lastCommentId, limit);
-        return ResponseEntity.ok(new ApiResponse<>("ok", Map.of("comments", comments)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("comments", comments)));
     }
 
     @PatchMapping("/{commentId}")
@@ -43,7 +43,7 @@ public class CommentController {
                                                      @PathVariable("commentId") Integer commentId,
                                                      @RequestBody @Validated CommentRequestDto commentRequestDto) {
         Map<String, Object> changes = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
-        return ResponseEntity.ok(new ApiResponse<>("modify_success", changes));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.modified(changes));
     }
 
     @DeleteMapping("/{commentId}")
@@ -51,6 +51,6 @@ public class CommentController {
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId) {
         commentService.removeComment(authInfo.getId(), postId, commentId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
