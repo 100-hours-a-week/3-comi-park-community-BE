@@ -24,6 +24,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
                 .httpOnly(true)
                 .sameSite("None")
+                .secure(true)
                 .maxAge(60 * 60 * 24 * 7) // 일주일
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
