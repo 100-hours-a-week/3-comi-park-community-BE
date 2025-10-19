@@ -34,6 +34,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         String method = request.getMethod();
 
+        if ("OPTIONS".equals(method)) {
+            return true;
+        }
+
         if (PUBLIC_ENDPOINT.containsKey(uri) && PUBLIC_ENDPOINT.get(uri).equals(method)) {
             return true;
         }

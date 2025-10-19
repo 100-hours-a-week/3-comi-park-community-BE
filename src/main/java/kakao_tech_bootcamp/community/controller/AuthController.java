@@ -23,7 +23,8 @@ public class AuthController {
         String sessionId = authStrategy.issue(authRequestDto);
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
                 .httpOnly(true)
-                .sameSite("Strict")
+                .sameSite("None")
+                .secure(true)
                 .maxAge(60 * 60 * 24 * 7) // 일주일
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
