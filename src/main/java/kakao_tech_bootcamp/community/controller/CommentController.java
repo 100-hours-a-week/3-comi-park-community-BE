@@ -22,11 +22,11 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Map<String, CommentResponseDto>>> saveComment(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, Object>>> saveComment(@CurrentMember AuthInfo authInfo,
                                                    @PathVariable Integer postId,
                                                    @RequestBody @Validated CommentRequestDto commentRequestDto) {
-        CommentResponseDto comment = commentService.saveComment(authInfo.getId(), postId, commentRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(Map.of("comment", comment)));
+        Map<String, Object> data = commentService.saveComment(authInfo.getId(), postId, commentRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(data));
     }
 
     @GetMapping
@@ -47,10 +47,10 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<ApiResponse<Void>> removeComment(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> removeComment(@CurrentMember AuthInfo authInfo,
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId) {
-        commentService.removeComment(authInfo.getId(), postId, commentId);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
+        int commentCount = commentService.removeComment(authInfo.getId(), postId, commentId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("commentCount", commentCount)));
     }
 }

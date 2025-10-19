@@ -30,16 +30,16 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final PostStatService postStatService;
 
-    public CommentResponseDto saveComment(Integer currentMemberId, Integer postId, CommentRequestDto dto) {
+    public Map<String, Object> saveComment(Integer currentMemberId, Integer postId, CommentRequestDto dto) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
         Member member = memberRepository.findById(currentMemberId).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
         Comment comment = commentRepository.save(new Comment(post, member, dto.getContent()));
 
         PostStat postStat = postStatService.findPostStat(post)
                 .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
-        postStatService.incrementCommentCount(postStat);
+        int commentCount = postStatService.incrementCommentCount(postStat);
 
-        return CommentResponseDto.of(comment);
+        return Map.of("comment", CommentResponseDto.of(comment), "commentCount", commentCount);
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +67,7 @@ public class CommentService {
         return Map.of("content", comment.getContent());
     }
 
-    public void removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
+    public int removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
 
@@ -77,8 +77,10 @@ public class CommentService {
 
         PostStat postStat = postStatService.findPostStat(post)
                 .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
-        postStatService.decrementCommentCount(postStat);
+        int commentCount = postStatService.decrementCommentCount(postStat);
 
         commentRepository.delete(comment);
+
+        return commentCount;
     }
 }
