@@ -36,8 +36,8 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
         authStrategy.invalidate(sessionId);
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId).maxAge(0).build();
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        return ResponseEntity.status(HttpStatus.OK)
                 .header(SET_COOKIE, cookie.toString())
-                .build();
+                .body(ApiResponse.success());
     }
 }

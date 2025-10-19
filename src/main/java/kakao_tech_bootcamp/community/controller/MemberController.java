@@ -52,8 +52,8 @@ public class MemberController {
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<Void> removeMember(@CurrentMember AuthInfo authInfo, @PathVariable Integer memberId) {
+    public ResponseEntity<ApiResponse<Void>> removeMember(@CurrentMember AuthInfo authInfo, @PathVariable Integer memberId) {
         memberService.removeMember(authInfo.getId(), memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
     }
 }

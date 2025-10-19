@@ -47,10 +47,10 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> removeComment(@CurrentMember AuthInfo authInfo,
+    public ResponseEntity<ApiResponse<Void>> removeComment(@CurrentMember AuthInfo authInfo,
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId) {
         commentService.removeComment(authInfo.getId(), postId, commentId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
     }
 }
