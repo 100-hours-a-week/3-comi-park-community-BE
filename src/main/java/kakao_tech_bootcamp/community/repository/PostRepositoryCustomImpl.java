@@ -40,6 +40,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                                 post.title,
                                 post.createdAt,
                                 new QMemberReferenceDto(
+                                        member.id,
                                         member.nickname,
                                         new QImageReferenceDto(
                                                 image.id,
