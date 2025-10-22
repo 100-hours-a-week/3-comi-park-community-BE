@@ -3,16 +3,22 @@ package kakao_tech_bootcamp.community.config;
 import kakao_tech_bootcamp.community.common.AuthInterceptor;
 import kakao_tech_bootcamp.community.common.CurrentMemberResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.io.File;
 import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    @Value("${storage.domain}")
+    private String domain;
+
     private final AuthInterceptor authInterceptor;
     private final CurrentMemberResolver currentMemberResolver;
 
@@ -38,5 +44,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000")
                 .allowedMethods("GET", "POST", "PATCH", "DELETE")
                 .allowCredentials(true);
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler(File.separator + "s3" + File.separator + "**")
+                .addResourceLocations("file:" + domain);
     }
 }

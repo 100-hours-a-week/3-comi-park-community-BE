@@ -38,6 +38,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        if (uri.startsWith("/s3/members")) {
+            return true;
+        }
+
         if (PUBLIC_ENDPOINT.containsKey(uri) && PUBLIC_ENDPOINT.get(uri).equals(method)) {
             return true;
         }
