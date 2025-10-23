@@ -2,6 +2,7 @@ package kakao_tech_bootcamp.community.controller;
 
 import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
+import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
@@ -48,5 +51,11 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK)
                 .header(SET_COOKIE, cookie.toString())
                 .body(ApiResponse.success());
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("sid") String sessionId) {
+        AuthInfo session = authStrategy.validate(sessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
     }
 }
