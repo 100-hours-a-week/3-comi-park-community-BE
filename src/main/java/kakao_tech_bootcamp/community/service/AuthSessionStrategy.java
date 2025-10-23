@@ -51,6 +51,9 @@ public class AuthSessionStrategy implements AuthStrategy {
         String sessionId = UUID.randomUUID().toString();
         AuthInfo session = new AuthInfo(member.getId());
 
+        // NOTE: 프론트 서버에서 회원 정보를 알아내기 위해 memberId 추가
+        sessionId += "_" + member.getId();
+
         sessionRepository.save(sessionId, session);
 
         return sessionId;

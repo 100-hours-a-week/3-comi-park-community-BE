@@ -25,6 +25,7 @@ public class AuthController {
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)
+                .path("/")
                 .maxAge(60 * 60 * 24 * 7) // 일주일
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -35,9 +36,17 @@ public class AuthController {
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
         authStrategy.invalidate(sessionId);
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId).maxAge(0).build();
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .header(SET_COOKIE, cookie.toString())
+
+        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(0) // 일주일
                 .build();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(SET_COOKIE, cookie.toString())
+                .body(ApiResponse.success());
     }
 }

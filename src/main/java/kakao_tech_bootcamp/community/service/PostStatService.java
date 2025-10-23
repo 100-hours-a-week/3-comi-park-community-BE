@@ -76,11 +76,13 @@ public class PostStatService {
         return postStat.getLikeCount() - 1;
     }
 
-    public void incrementCommentCount(PostStat postStat) {
+    public int incrementCommentCount(PostStat postStat) {
         postStatAsyncService.asyncIncrementCommentCount(postStat.getPostId());
+        return postStat.getCommentCount() + 1;
     }
 
-    public void decrementCommentCount(PostStat postStat) {
+    public int decrementCommentCount(PostStat postStat) {
         postStatAsyncService.asyncDecrementCommentCount(postStat.getPostId());
+        return postStat.getCommentCount() - 1;
     }
 }
