@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import kakao_tech_bootcamp.community.common.StorageProperties;
 import kakao_tech_bootcamp.community.entity.Image;
 import lombok.Getter;
@@ -13,6 +14,7 @@ public class ImageResponseDto {
     private String objectKey;
     private String filename;
 
+    @QueryProjection
     public ImageResponseDto(Integer id, String objectKey, String filename) {
         this.id = id;
         this.objectKey = objectKey;

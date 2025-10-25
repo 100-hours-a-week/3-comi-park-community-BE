@@ -14,7 +14,7 @@ public class PostResponseDto {
     private String title;
     private String content;
     private MemberReferenceDto member;
-    private ImageReferenceDto image;
+    private ImageResponseDto image;
     private LocalDateTime createdAt;
     private boolean isLiked;
     private int viewCount;
@@ -24,14 +24,14 @@ public class PostResponseDto {
     public static PostResponseDto of(Post post, boolean isLiked, PostStat postStat) {
         return new PostResponseDto(post.getId(), post.getTitle(), post.getContent(),
                 MemberReferenceDto.of(post.getMember()),
-                ImageReferenceDto.of(post.getImage()),
+                ImageResponseDto.of(post.getImage()),
                 post.getCreatedAt(), isLiked,
                 postStat.getViewCount(), postStat.getLikeCount(), postStat.getCommentCount());
     }
 
     public static PostResponseDto of(Post post) {
         return new PostResponseDto(post.getId(), post.getTitle(), post.getContent(),
-                MemberReferenceDto.of(post.getMember()), ImageReferenceDto.of(post.getImage()),
+                MemberReferenceDto.of(post.getMember()), ImageResponseDto.of(post.getImage()),
                 post.getCreatedAt(), false, 0, 0, 0);
     }
 }

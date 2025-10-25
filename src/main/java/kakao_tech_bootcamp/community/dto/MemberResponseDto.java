@@ -12,11 +12,11 @@ public class MemberResponseDto {
     private Integer id;
     private String email;
     private String nickname;
-    private ImageReferenceDto image;
+    private ImageResponseDto image;
     private LocalDateTime createdAt;
 
     public static MemberResponseDto of(Member member) {
         return new MemberResponseDto(member.getId(), member.getEmail(),
-                member.getNickname(),ImageReferenceDto.of(member.getImage()), member.getCreatedAt());
+                member.getNickname(),ImageResponseDto.of(member.getImage()), member.getCreatedAt());
     }
 }
