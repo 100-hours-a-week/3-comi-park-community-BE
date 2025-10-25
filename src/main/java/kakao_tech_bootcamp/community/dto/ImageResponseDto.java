@@ -23,6 +23,6 @@ public class ImageResponseDto {
     }
 
     public static ImageResponseDto of(Image image) {
-        return new ImageResponseDto(image.getId(), image.getObjectKey(), image.getFilename());
+        return image != null ? new ImageResponseDto(image.getId(), image.getObjectKey(), image.getFilename()) : null;
     }
 }
