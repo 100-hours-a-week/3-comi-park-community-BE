@@ -1,20 +1,26 @@
 package kakao_tech_bootcamp.community.dto;
 
+import kakao_tech_bootcamp.community.common.StorageProperties;
 import kakao_tech_bootcamp.community.entity.Image;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class ImageResponseDto {
     private Integer id;
-    private String url; // presigned PUT URL과 CloudFront GET URL 자리
+    private String url;
     private String objectKey;
     private String filename;
 
+    public ImageResponseDto(Integer id, String objectKey, String filename) {
+        this.id = id;
+        this.objectKey = objectKey;
+        this.filename = filename;
+        this.url = StorageProperties.getStaticBaseUrl() + objectKey;
+    }
+
     public static ImageResponseDto of(Image image) {
-        return new ImageResponseDto(image.getId(), null, image.getObjectKey(), image.getFilename());
+        return new ImageResponseDto(image.getId(), image.getObjectKey(), image.getFilename());
     }
 }
