@@ -8,7 +8,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
 import kakao_tech_bootcamp.community.dto.QPostAllResponseDto;
 import kakao_tech_bootcamp.community.dto.QMemberReferenceDto;
-import kakao_tech_bootcamp.community.dto.QImageReferenceDto;
+import kakao_tech_bootcamp.community.dto.QImageResponseDto;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -42,9 +42,10 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                                 new QMemberReferenceDto(
                                         member.id,
                                         member.nickname,
-                                        new QImageReferenceDto(
+                                        new QImageResponseDto(
                                                 image.id,
-                                                image.objectKey
+                                                image.objectKey,
+                                                image.filename
                                         )
                                 ),
                                 isLikedExpression,
