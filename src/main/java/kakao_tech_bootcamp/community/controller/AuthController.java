@@ -45,7 +45,7 @@ public class AuthController {
                 .sameSite("None")
                 .secure(true)
                 .path("/")
-                .maxAge(0) // 일주일
+                .maxAge(0)
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK)
