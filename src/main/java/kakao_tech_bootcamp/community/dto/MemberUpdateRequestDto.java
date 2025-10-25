@@ -14,7 +14,7 @@ public class MemberUpdateRequestDto {
     @Pattern(regexp = "^\\S{1,10}$", message = "닉네임 형식이 유효하지 않습니다")
     private String nickname;
 
-    private ImageReferenceDto image;
+    private ImageRequestDto image;
 
     @NotNull(message = "imageDeleted 필드는 필수 값입니다")
     private Boolean imageDeleted;

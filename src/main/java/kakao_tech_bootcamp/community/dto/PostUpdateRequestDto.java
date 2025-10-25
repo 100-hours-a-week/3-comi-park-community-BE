@@ -12,7 +12,7 @@ public class PostUpdateRequestDto {
     @Size(min = 1, message = "내용이 존재하지 않습니다")
     private String content;
 
-    private ImageReferenceDto image;
+    private ImageRequestDto image;
 
     @NotNull(message = "imageDeleted 필드는 필수 값입니다")
     private Boolean imageDeleted;
