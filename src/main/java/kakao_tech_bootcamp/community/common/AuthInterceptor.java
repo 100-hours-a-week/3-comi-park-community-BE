@@ -24,7 +24,9 @@ public class AuthInterceptor implements HandlerInterceptor {
             "/members/availability/nickname", "POST",
             "/images/members", "POST",
             "/terms", "GET",
-            "/privacy", "GET"
+            "/privacy", "GET",
+            "/style.css", "GET",
+            "/header.css", "GET"
     );
     private final AuthStrategy authStrategy;
 
