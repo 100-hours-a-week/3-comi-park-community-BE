@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthStrategy;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.Map;
 import java.util.Optional;
 
+@Log4j2
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
     private static final Map<String, String> PUBLIC_ENDPOINT = Map.of(
@@ -20,7 +22,11 @@ public class AuthInterceptor implements HandlerInterceptor {
             "/members", "POST",
             "/members/availability/email", "POST",
             "/members/availability/nickname", "POST",
-            "/images/members", "POST"
+            "/images/members", "POST",
+            "/terms", "GET",
+            "/privacy", "GET",
+            "/style.css", "GET",
+            "/header.css", "GET"
     );
     private final AuthStrategy authStrategy;
 
