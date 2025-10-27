@@ -9,6 +9,7 @@ import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
-//@Service
+@Service
 @RequiredArgsConstructor
 public class AuthJwtStrategy implements AuthStrategy {
     private final MemberRepository memberRepository;
@@ -25,7 +27,7 @@ public class AuthJwtStrategy implements AuthStrategy {
     private final JwtProperties jwtProperties ;
 
     @Override
-    public String issue(AuthRequestDto dto) {
+    public List<ResponseCookie> issue(AuthRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -39,7 +41,7 @@ public class AuthJwtStrategy implements AuthStrategy {
 
         long accessTtlSec = 15 * 60;
 
-        return Jwts.builder()
+        String credential = Jwts.builder()
                 .setIssuer(jwtProperties.getIssuer())
                 .claim("id", member.getId())
                 .claim("email", member.getEmail())
@@ -47,6 +49,16 @@ public class AuthJwtStrategy implements AuthStrategy {
                 .setExpiration(Date.from(Instant.now().plusSeconds(accessTtlSec)))
                 .signWith(jwtProperties.getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
+
+        ResponseCookie cookie = ResponseCookie.from("sid", credential)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60 * 24 * 7) // 일주일
+                .build();
+
+        return List.of(cookie);
     }
 
     @Override
@@ -63,8 +75,16 @@ public class AuthJwtStrategy implements AuthStrategy {
     }
 
     @Override
-    public void invalidate(String credential) {
+    public List<ResponseCookie> invalidate(String credential) {
+        ResponseCookie cookie = ResponseCookie.from("sid", credential)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .build();
 
+        return List.of(cookie);
     }
 
     private LocalDateTime toLocalDateTime(Date date) {

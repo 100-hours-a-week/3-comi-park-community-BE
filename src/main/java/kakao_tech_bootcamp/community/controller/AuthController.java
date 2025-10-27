@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
@@ -23,39 +24,29 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> logout(@RequestBody @Validated AuthRequestDto authRequestDto) {
-        String sessionId = authStrategy.issue(authRequestDto);
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(60 * 60 * 24 * 7) // 일주일
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .header(SET_COOKIE, cookie.toString())
-                .body(ApiResponse.success());
+        List<ResponseCookie> cookies = authStrategy.issue(authRequestDto);
+        return response(cookies);
     }
 
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
-        authStrategy.invalidate(sessionId);
-
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .header(SET_COOKIE, cookie.toString())
-                .body(ApiResponse.success());
+        List<ResponseCookie> cookies = authStrategy.invalidate(sessionId);
+        return response(cookies);
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("sid") String sessionId) {
         AuthInfo session = authStrategy.validate(sessionId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
+    }
+
+    private ResponseEntity<ApiResponse<Void>> response(List<ResponseCookie> cookies) {
+        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
+
+        for (ResponseCookie cookie : cookies) {
+            responseBuilder.header(SET_COOKIE, cookie.toString());
+        }
+
+        return responseBuilder.body(ApiResponse.success());
     }
 }
