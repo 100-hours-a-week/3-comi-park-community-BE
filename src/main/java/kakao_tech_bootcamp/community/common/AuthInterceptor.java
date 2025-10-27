@@ -56,7 +56,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     private Optional<String> extractCredential(HttpServletRequest request) {
-        return extractCredentialFromCookie(request);
+        return extractCredentialFromHeader(request).or(() -> extractCredentialFromCookie(request));
     }
 
     private Optional<String> extractCredentialFromCookie(HttpServletRequest request) {
@@ -66,5 +66,11 @@ public class AuthInterceptor implements HandlerInterceptor {
                 .filter(cookie -> "sid".equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
+    }
+
+    private Optional<String> extractCredentialFromHeader(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader("Authorization"))
+                .filter(header -> header.startsWith("Bearer "))
+                .map(header -> header.substring((7)));
     }
 }
