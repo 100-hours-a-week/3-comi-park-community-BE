@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class AuthSessionProvider implements AuthProvider {
     private final static int SESSION_LIMIT = 5;
@@ -32,19 +32,30 @@ public class AuthSessionProvider implements AuthProvider {
                     .ifPresent(sessionRepository::delete);
         }
 
-        String sessionId = UUID.randomUUID().toString();
-        String refreshId = UUID.randomUUID().toString();
-        Session session = new Session(member.getId(), refreshId);
+        Credential credential = issueCredential(member);
+        Credential refreshCredential = issueRefreshCredential(member);
 
-        sessionRepository.save(sessionId, session);
+        Session session = new Session(member.getId(), refreshCredential.getValue());
+        sessionRepository.save(credential.getValue(), session);
 
+        return List.of(credential, refreshCredential);
+    }
+
+    @Override
+    public Credential issueCredential(Member member) {
         long sessionIdTtlSeconds = 60 * 60 * 24 * 7; // 일주일
-        long refreshIdTtlSeconds = 60 * 60 * 24 * 30; // 일주일
+        String sessionId = UUID.randomUUID().toString();
 
-        return List.of(
-                new Credential("credential", sessionId, sessionIdTtlSeconds, "/"),
-                new Credential("refreshCredential", refreshId, refreshIdTtlSeconds, "/auth")
-        );
+        return new Credential("credential", sessionId, sessionIdTtlSeconds, "/");
+
+    }
+
+    @Override
+    public Credential issueRefreshCredential(Member member) {
+        long refreshIdTtlSeconds = 60 * 60 * 24 * 30; // 일주일
+        String refreshId = UUID.randomUUID().toString();
+
+        return new Credential("refreshCredential", refreshId, refreshIdTtlSeconds, "/auth");
     }
 
     @Override
@@ -64,10 +75,17 @@ public class AuthSessionProvider implements AuthProvider {
     public List<Credential> invalidate(String credential, String refreshCredential) {
         // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
         sessionRepository.deleteById(credential);
-
-        return List.of(
-                new Credential("credential", credential, 0, "/"),
-                new Credential("refreshCredential", refreshCredential, 0, "/auth")
-        );
+        return List.of(invalidateCredential(credential), invalidateRefreshCredential(refreshCredential));
     }
+
+    @Override
+    public Credential invalidateCredential(String credential) {
+        return new Credential("credential", credential, 0, "/");
+    }
+
+    @Override
+    public Credential invalidateRefreshCredential(String refreshCredential) {
+        return new Credential("refreshCredential", refreshCredential, 0, "/auth");
+    }
+
 }

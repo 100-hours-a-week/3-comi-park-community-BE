@@ -24,17 +24,23 @@ public class AuthJwtProvider implements AuthProvider {
 
     @Override
     public List<Credential> issue(Member member) {
-        long accessTtlSec = 15 * 60;
-        long refreshTtlSec = 60 * 60 * 24 * 7; // 일주일
-
-        String accessToken = createJwtToken(member, accessTtlSec);
-        String refreshToken = createJwtToken(member, refreshTtlSec);
-
-        return List.of(
-                new Credential("credential", accessToken, accessTtlSec, "/"),
-                new Credential("refreshCredential", refreshToken, refreshTtlSec, "/auth")
-        );
+        return List.of(issueCredential(member), issueRefreshCredential(member));
     }
+
+    @Override
+    public Credential issueCredential(Member member) {
+        long accessTtlSeconds = 15 * 60;  // 15분
+        String accessToken = createJwtToken(member, accessTtlSeconds);
+        return new Credential("credential", accessToken, accessTtlSeconds, "/");
+    }
+
+    @Override
+    public Credential issueRefreshCredential(Member member) {
+        long refreshTtlSeconds = 60 * 60 * 24 * 30; // 30일
+        String refreshToken = createJwtToken(member, refreshTtlSeconds);
+        return new Credential("refreshCredential", refreshToken, refreshTtlSeconds, "/auth");
+    }
+
 
     @Override
     public AuthInfo validate(String credential, String refreshCredential) {
@@ -57,10 +63,17 @@ public class AuthJwtProvider implements AuthProvider {
 
     @Override
     public List<Credential> invalidate(String credential, String refreshCredential) {
-        return List.of(
-                new Credential("credential", credential, 0, "/"),
-                new Credential("refreshCredential", refreshCredential, 0, "/auth")
-        );
+        return List.of(invalidateCredential(credential), invalidateRefreshCredential(refreshCredential));
+    }
+
+    @Override
+    public Credential invalidateCredential(String credential) {
+        return new Credential("credential", credential, 0, "/");
+    }
+
+    @Override
+    public Credential invalidateRefreshCredential(String refreshCredential) {
+        return new Credential("refreshCredential", refreshCredential, 0, "/auth");
     }
 
     private String createJwtToken(Member member, long ttlSeconds) {
