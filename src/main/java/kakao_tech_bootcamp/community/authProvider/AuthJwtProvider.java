@@ -1,17 +1,18 @@
 package kakao_tech_bootcamp.community.authProvider;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureException;
 import kakao_tech_bootcamp.community.common.JwtProperties;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
-import kakao_tech_bootcamp.community.dto.AuthRequestDto;
+import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class AuthJwtProvider implements AuthProvider {
     private final MemberRepository memberRepository;
@@ -27,18 +28,7 @@ public class AuthJwtProvider implements AuthProvider {
     private final JwtProperties jwtProperties ;
 
     @Override
-    public List<ResponseCookie> issue(AuthRequestDto dto) {
-        Member member = memberRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
-
-        /*
-         회원을 인증할 수 없다는 401이 논리적으로 옳을 수 있지만
-         보안을 고려하여 이메일/비밀번호 중 무엇이 틀렸는지 힌트를 주지 않기 위해 404로 통일
-         */
-        if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
-            throw new NotFoundException("회원을 찾을 수 없습니다");
-        }
-
+    public List<ResponseCookie> issue(Member member) {
         long accessTtlSec = 15 * 60;
 
         String credential = Jwts.builder()
@@ -63,15 +53,21 @@ public class AuthJwtProvider implements AuthProvider {
 
     @Override
     public AuthInfo validate(String credential) {
-        Claims body = Jwts.parserBuilder()
-                .setSigningKey(jwtProperties.getSecretKey()).build()
-                .parseClaimsJws(credential).getBody();
+        try {
+            Claims body = Jwts.parserBuilder()
+                    .setSigningKey(jwtProperties.getSecretKey()).build()
+                    .parseClaimsJws(credential).getBody();
 
-        return new AuthInfo(
-                (Integer) body.get("id"),
-                toLocalDateTime(body.getIssuedAt()),
-                toLocalDateTime(body.getExpiration())
-        );
+            return new AuthInfo(
+                    (Integer) body.get("id"),
+                    toLocalDateTime(body.getIssuedAt()),
+                    toLocalDateTime(body.getExpiration())
+            );
+        } catch (ExpiredJwtException e) {
+            throw new UnauthorizedException("인증 정보가 만료됐습니다");
+        } catch (SignatureException e) {
+            throw new UnauthorizedException("인증 정보가 유효하지 않습니다");
+        }
     }
 
     @Override
