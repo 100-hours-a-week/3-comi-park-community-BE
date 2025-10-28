@@ -8,10 +8,8 @@ import io.jsonwebtoken.security.SignatureException;
 import kakao_tech_bootcamp.community.common.JwtProperties;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.entity.Member;
-import kakao_tech_bootcamp.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -23,32 +21,20 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class AuthJwtProvider implements AuthProvider {
-    private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtProperties jwtProperties ;
 
     @Override
     public List<ResponseCookie> issue(Member member) {
         long accessTtlSec = 15 * 60;
+        long refreshTtlSec = 60 * 60 * 24 * 7; // 일주일
 
-        String credential = Jwts.builder()
-                .setIssuer(jwtProperties.getIssuer())
-                .claim("id", member.getId())
-                .claim("email", member.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(Date.from(Instant.now().plusSeconds(accessTtlSec)))
-                .signWith(jwtProperties.getSecretKey(), SignatureAlgorithm.HS256)
-                .compact();
+        String accessToken = createJwtToken(member, accessTtlSec);
+        String refreshToken = createJwtToken(member, refreshTtlSec);
 
-        ResponseCookie cookie = ResponseCookie.from("sid", credential)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(60 * 60 * 24 * 7) // 일주일
-                .build();
-
-        return List.of(cookie);
+        return List.of(
+                createCookie("accessToken", accessToken, accessTtlSec, "/"),
+                createCookie("refreshToken", refreshToken, refreshTtlSec, "/auth")
+        );
     }
 
     @Override
@@ -72,7 +58,7 @@ public class AuthJwtProvider implements AuthProvider {
 
     @Override
     public List<ResponseCookie> invalidate(String credential) {
-        ResponseCookie cookie = ResponseCookie.from("sid", credential)
+        ResponseCookie cookie = ResponseCookie.from("accessToken", credential)
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)
@@ -81,6 +67,27 @@ public class AuthJwtProvider implements AuthProvider {
                 .build();
 
         return List.of(cookie);
+    }
+
+    private String createJwtToken(Member member, long ttlSeconds) {
+        return Jwts.builder()
+                .setIssuer(jwtProperties.getIssuer())
+                .claim("id", member.getId())
+                .claim("email", member.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(Date.from(Instant.now().plusSeconds(ttlSeconds)))
+                .signWith(jwtProperties.getSecretKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private ResponseCookie createCookie(String name, String token, long ttlSeconds, String path) {
+        return ResponseCookie.from(name, token)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path(path)
+                .maxAge(ttlSeconds)
+                .build();
     }
 
     private LocalDateTime toLocalDateTime(Date date) {
