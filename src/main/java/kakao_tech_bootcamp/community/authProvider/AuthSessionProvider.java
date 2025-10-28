@@ -5,12 +5,13 @@ import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+@Component
 @RequiredArgsConstructor
 public class AuthSessionProvider implements AuthProvider {
     private final static int SESSION_LIMIT = 5;
@@ -19,7 +20,7 @@ public class AuthSessionProvider implements AuthProvider {
 
     @Override
     public List<Credential> issue(Member member) {
-        List<AuthInfo> memberSessions = sessionRepository.findAllByMemberId(member.getId());
+        List<Session> memberSessions = sessionRepository.findAllByMemberId(member.getId());
 
         /*
          각 회원은 로그인 세션 최대 5개까지 유지 가능
@@ -27,38 +28,36 @@ public class AuthSessionProvider implements AuthProvider {
          */
         if (memberSessions.size() >= SESSION_LIMIT) {
             memberSessions.stream()
-                    .min(Comparator.comparing(AuthInfo::getCreatedAt))
+                    .min(Comparator.comparing(Session::getCreatedAt))
                     .ifPresent(sessionRepository::delete);
         }
 
         String sessionId = UUID.randomUUID().toString();
-        AuthInfo session = new AuthInfo(member.getId());
+        String refreshId = UUID.randomUUID().toString();
+        Session session = new Session(member.getId(), refreshId);
 
         sessionRepository.save(sessionId, session);
 
-        ResponseCookie cookie = ResponseCookie.from("credential", sessionId)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(60 * 60 * 24 * 7) // 일주일
-                .build();
+        long sessionIdTtlSeconds = 60 * 60 * 24 * 7; // 일주일
+        long refreshIdTtlSeconds = 60 * 60 * 24 * 30; // 일주일
 
-//        return List.of(cookie);
-        return null;
+        return List.of(
+                new Credential("credential", sessionId, sessionIdTtlSeconds, "/"),
+                new Credential("refreshCredential", refreshId, refreshIdTtlSeconds, "/auth")
+        );
     }
 
     @Override
     public AuthInfo validate(String credential, String refreshCredential) {
-        AuthInfo session = sessionRepository.findById(credential)
+        Session session = sessionRepository.findById(credential)
                 .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
 
-        if (session.isExpired()) {
+        if (session.isSessionExpired()) {
             sessionRepository.deleteById(credential);
             throw new UnauthorizedException("인증 정보가 만료됐습니다");
         }
 
-        return session;
+        return new AuthInfo(session.getId(), session.getCreatedAt(), session.getExpiredAt());
     }
 
     @Override
@@ -66,15 +65,9 @@ public class AuthSessionProvider implements AuthProvider {
         // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
         sessionRepository.deleteById(credential);
 
-        ResponseCookie cookie = ResponseCookie.from("credential", credential)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
-//        return List.of(cookie);
-        return null;
+        return List.of(
+                new Credential("credential", credential, 0, "/"),
+                new Credential("refreshCredential", refreshCredential, 0, "/auth")
+        );
     }
 }
