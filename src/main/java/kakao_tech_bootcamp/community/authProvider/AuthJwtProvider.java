@@ -32,7 +32,7 @@ public class AuthJwtProvider implements AuthProvider {
         String refreshToken = createJwtToken(member, refreshTtlSec);
 
         return List.of(
-                createCookie("accessToken", accessToken, accessTtlSec, "/"),
+                createCookie("credential", accessToken, accessTtlSec, "/"),
                 createCookie("refreshToken", refreshToken, refreshTtlSec, "/auth")
         );
     }
@@ -58,7 +58,7 @@ public class AuthJwtProvider implements AuthProvider {
 
     @Override
     public List<ResponseCookie> invalidate(String credential) {
-        ResponseCookie cookie = ResponseCookie.from("accessToken", credential)
+        ResponseCookie cookie = ResponseCookie.from("credential", credential)
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)

@@ -57,12 +57,12 @@ public class MemberController {
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<ApiResponse<Void>> removeMember(@CookieValue("sid") String sessionId,
+    public ResponseEntity<ApiResponse<Void>> removeMember(@CookieValue("credential") String credential,
                                                           @CurrentMember AuthInfo authInfo,
                                                           @PathVariable Integer memberId) {
         memberService.removeMember(authInfo.getId(), memberId);
 
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
+        ResponseCookie cookie = ResponseCookie.from("credential", credential)
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)

@@ -63,7 +63,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         return Optional.ofNullable(request.getCookies())
                 .stream()
                 .flatMap(Arrays::stream)
-                .filter(cookie -> "sid".equals(cookie.getName()) || "accessToken".equals(cookie.getName()))
+                .filter(cookie -> "credential".equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
     }

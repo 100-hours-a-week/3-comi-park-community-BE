@@ -29,14 +29,14 @@ public class AuthController {
     }
 
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
-        List<ResponseCookie> cookies = authService.invalidate(sessionId);
+    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("credential") String credential) {
+        List<ResponseCookie> cookies = authService.invalidate(credential);
         return response(cookies);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("sid") String sessionId) {
-        AuthInfo session = authService.validate(sessionId);
+    public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("credential") String credential) {
+        AuthInfo session = authService.validate(credential);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
     }
 

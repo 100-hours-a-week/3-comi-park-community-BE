@@ -36,7 +36,7 @@ public class AuthSessionProvider implements AuthProvider {
 
         sessionRepository.save(sessionId, session);
 
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
+        ResponseCookie cookie = ResponseCookie.from("credential", sessionId)
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)
@@ -65,7 +65,7 @@ public class AuthSessionProvider implements AuthProvider {
         // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
         sessionRepository.deleteById(credential);
 
-        ResponseCookie cookie = ResponseCookie.from("sid", credential)
+        ResponseCookie cookie = ResponseCookie.from("credential", credential)
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)
