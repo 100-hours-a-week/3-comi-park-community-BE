@@ -13,6 +13,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -32,10 +33,13 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String credential = extractCredential(request)
-                .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
+        Map<String, String> credentials = extractCredential(request);
 
-        AuthInfo authInfo = authProvider.validate(credential);
+        if (credentials.isEmpty()) {
+            throw new UnauthorizedException("회원만 접근 가능한 서비스입니다");
+        }
+
+        AuthInfo authInfo = authProvider.validate(credentials.get("credential"), credentials.get("refreshCredential"));
         request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;
@@ -55,22 +59,14 @@ public class AuthInterceptor implements HandlerInterceptor {
                 );
     }
 
-    private Optional<String> extractCredential(HttpServletRequest request) {
-        return extractCredentialFromHeader(request).or(() -> extractCredentialFromCookie(request));
-    }
-
-    private Optional<String> extractCredentialFromCookie(HttpServletRequest request) {
+    private Map<String, String> extractCredential(HttpServletRequest request) {
         return Optional.ofNullable(request.getCookies())
                 .stream()
                 .flatMap(Arrays::stream)
-                .filter(cookie -> "credential".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst();
-    }
-
-    private Optional<String> extractCredentialFromHeader(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader("Authorization"))
-                .filter(header -> header.startsWith("Bearer "))
-                .map(header -> header.substring((7)));
+                .filter(cookie -> cookie.getName().startsWith("credential"))
+                .collect(Collectors.toMap(
+                        Cookie::getName,
+                        Cookie::getValue
+                ));
     }
 }

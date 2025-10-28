@@ -1,14 +1,13 @@
 package kakao_tech_bootcamp.community.authProvider;
 
 import kakao_tech_bootcamp.community.entity.Member;
-import org.springframework.http.ResponseCookie;
 
 import java.util.List;
 
 public interface AuthProvider {
-    List<ResponseCookie> issue(Member member);
+    List<Credential> issue(Member member);
 
-    AuthInfo validate(String credential);
+    AuthInfo validate(String credential, String refreshCredential);
 
-    List<ResponseCookie> invalidate(String credential);
+    List<Credential> invalidate(String credential, String refreshCredential);
 }

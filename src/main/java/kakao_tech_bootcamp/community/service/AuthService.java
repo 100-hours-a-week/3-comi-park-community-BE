@@ -2,6 +2,7 @@ package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.authProvider.AuthInfo;
 import kakao_tech_bootcamp.community.authProvider.AuthProvider;
+import kakao_tech_bootcamp.community.authProvider.Credential;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
@@ -32,14 +33,24 @@ public class AuthService {
             throw new NotFoundException("회원을 찾을 수 없습니다");
         }
 
-        return authProvider.issue(member);
+        return authProvider.issue(member).stream().map(this::createCookie).toList();
     }
 
-    public AuthInfo validate(String credential) {
-        return authProvider.validate(credential);
+    public AuthInfo validate(String credential, String refreshCredential) {
+        return authProvider.validate(credential, refreshCredential);
     }
 
-    public List<ResponseCookie> invalidate(String credential) {
-        return authProvider.invalidate(credential);
+    public List<ResponseCookie> invalidate(String credential, String refreshCredential) {
+        return authProvider.invalidate(credential, refreshCredential).stream().map(this::createCookie).toList();
+    }
+
+    private ResponseCookie createCookie(Credential credential) {
+        return ResponseCookie.from(credential.getName(), credential.getValue())
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path(credential.getPath())
+                .maxAge(credential.getTtlSeconds())
+                .build();
     }
 }

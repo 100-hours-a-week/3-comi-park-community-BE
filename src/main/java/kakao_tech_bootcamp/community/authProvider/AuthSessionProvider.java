@@ -18,7 +18,7 @@ public class AuthSessionProvider implements AuthProvider {
     private final SessionRepository sessionRepository;
 
     @Override
-    public List<ResponseCookie> issue(Member member) {
+    public List<Credential> issue(Member member) {
         List<AuthInfo> memberSessions = sessionRepository.findAllByMemberId(member.getId());
 
         /*
@@ -44,11 +44,12 @@ public class AuthSessionProvider implements AuthProvider {
                 .maxAge(60 * 60 * 24 * 7) // 일주일
                 .build();
 
-        return List.of(cookie);
+//        return List.of(cookie);
+        return null;
     }
 
     @Override
-    public AuthInfo validate(String credential) {
+    public AuthInfo validate(String credential, String refreshCredential) {
         AuthInfo session = sessionRepository.findById(credential)
                 .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
 
@@ -61,7 +62,7 @@ public class AuthSessionProvider implements AuthProvider {
     }
 
     @Override
-    public List<ResponseCookie> invalidate(String credential) {
+    public List<Credential> invalidate(String credential, String refreshCredential) {
         // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
         sessionRepository.deleteById(credential);
 
@@ -73,6 +74,7 @@ public class AuthSessionProvider implements AuthProvider {
                 .maxAge(0)
                 .build();
 
-        return List.of(cookie);
+//        return List.of(cookie);
+        return null;
     }
 }

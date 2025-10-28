@@ -29,15 +29,17 @@ public class AuthController {
     }
 
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("credential") String credential) {
-        List<ResponseCookie> cookies = authService.invalidate(credential);
+    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("credential") String credential,
+                                                    @CookieValue(value = "refreshCredential") String refreshCredential) {
+        List<ResponseCookie> cookies = authService.invalidate(credential, refreshCredential);
         return response(cookies);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("credential") String credential) {
-        AuthInfo session = authService.validate(credential);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
+    public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("credential") String credential,
+                                                                       @CookieValue(value = "refreshCredential") String refreshCredential) {
+        AuthInfo authInfo = authService.validate(credential, refreshCredential);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", authInfo)));
     }
 
     private ResponseEntity<ApiResponse<Void>> response(List<ResponseCookie> cookies) {
