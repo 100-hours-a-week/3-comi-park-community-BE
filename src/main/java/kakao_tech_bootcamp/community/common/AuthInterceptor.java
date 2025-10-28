@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.authProvider.AuthInfo;
+import kakao_tech_bootcamp.community.service.AuthJwtService;
 import kakao_tech_bootcamp.community.service.AuthSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,10 +18,12 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
-    private final AuthSessionService authProvider;
+//    private final AuthSessionService authProvider;
+    private final AuthJwtService authProvider;
     private static final Map<String, String> EXCLUDE_PATHS = Map.of(
             "/auth", "POST",
             "/auth/session", "POST",
+            "/auth/jwt", "POST",
             "/members", "POST",
             "/members/availability/email", "POST",
             "/members/availability/nickname", "POST",
@@ -33,10 +36,16 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String credential = extractSid(request)
-                .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
+        // Session
+//        String credential = extractSid(request)
+//                .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
 
-        AuthInfo authInfo = authProvider.validate(credential);
+//        AuthInfo authInfo = authProvider.validate(credential);
+
+        // JWT
+        String accessToken = extractAccessToken(request).orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
+        String refreshToken = extractAccessToken(request).orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
+        AuthInfo authInfo = authProvider.validate(accessToken, refreshToken);
         request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;
@@ -61,6 +70,24 @@ public class AuthInterceptor implements HandlerInterceptor {
                 .stream()
                 .flatMap(Arrays::stream)
                 .filter(cookie -> "sid".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
+    }
+
+    private Optional<String> extractAccessToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies())
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
+    }
+
+    private Optional<String> extractRefreshToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies())
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
     }
