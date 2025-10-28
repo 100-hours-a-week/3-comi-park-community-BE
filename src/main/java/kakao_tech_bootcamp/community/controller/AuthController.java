@@ -23,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody @Validated AuthRequestDto authRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> login(@RequestBody @Validated AuthRequestDto authRequestDto) {
         List<ResponseCookie> cookies = authService.issue(authRequestDto);
         return response(cookies);
     }
