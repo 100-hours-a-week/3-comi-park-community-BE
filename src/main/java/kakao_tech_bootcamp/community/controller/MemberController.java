@@ -4,7 +4,6 @@ import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.*;
 import kakao_tech_bootcamp.community.authProvider.AuthInfo;
-import kakao_tech_bootcamp.community.authProvider.AuthProvider;
 import kakao_tech_bootcamp.community.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,7 +22,6 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberController {
-    private final AuthProvider authProvider;
     private final MemberService memberService;
 
     @PostMapping("/availability/email")
