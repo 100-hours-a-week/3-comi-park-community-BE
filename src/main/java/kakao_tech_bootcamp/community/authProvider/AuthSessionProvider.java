@@ -4,10 +4,8 @@ import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.SessionRepository;
-import kakao_tech_bootcamp.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,8 +16,6 @@ public class AuthSessionProvider implements AuthProvider {
     private final static int SESSION_LIMIT = 5;
 
     private final SessionRepository sessionRepository;
-    private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<ResponseCookie> issue(Member member) {
