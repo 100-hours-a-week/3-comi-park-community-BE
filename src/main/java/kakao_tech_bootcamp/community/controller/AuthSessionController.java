@@ -1,10 +1,9 @@
 package kakao_tech_bootcamp.community.controller;
 
-import kakao_tech_bootcamp.community.authProvider.AuthInfo;
+import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.service.AuthSessionService;
-import kakao_tech_bootcamp.community.service.Session;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;

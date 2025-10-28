@@ -2,7 +2,7 @@ package kakao_tech_bootcamp.community.common;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
-import kakao_tech_bootcamp.community.authProvider.AuthInfo;
+import kakao_tech_bootcamp.community.service.AuthInfo;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;

@@ -5,7 +5,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
-import kakao_tech_bootcamp.community.authProvider.AuthInfo;
 import kakao_tech_bootcamp.community.common.JwtProperties;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;

@@ -1,4 +1,4 @@
-package kakao_tech_bootcamp.community.authProvider;
+package kakao_tech_bootcamp.community.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

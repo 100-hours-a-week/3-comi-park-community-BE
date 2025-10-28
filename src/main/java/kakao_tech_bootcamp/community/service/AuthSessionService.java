@@ -1,6 +1,5 @@
 package kakao_tech_bootcamp.community.service;
 
-import kakao_tech_bootcamp.community.authProvider.AuthInfo;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
