@@ -1,6 +1,6 @@
 package kakao_tech_bootcamp.community.repository;
 
-import kakao_tech_bootcamp.community.authProvider.Session;
+import kakao_tech_bootcamp.community.service.Session;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

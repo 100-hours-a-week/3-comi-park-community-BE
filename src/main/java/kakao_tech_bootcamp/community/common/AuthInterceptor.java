@@ -3,9 +3,9 @@ package kakao_tech_bootcamp.community.common;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kakao_tech_bootcamp.community.authProvider.AuthProvider;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.authProvider.AuthInfo;
+import kakao_tech_bootcamp.community.service.AuthSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -13,14 +13,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
-    private final AuthProvider authProvider;
+    private final AuthSessionService authProvider;
     private static final Map<String, String> EXCLUDE_PATHS = Map.of(
             "/auth", "POST",
+            "/auth/session", "POST",
             "/members", "POST",
             "/members/availability/email", "POST",
             "/members/availability/nickname", "POST",
@@ -33,13 +33,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        Map<String, String> credentials = extractCredential(request);
+        String credential = extractSid(request)
+                .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
 
-        if (credentials.isEmpty()) {
-            throw new UnauthorizedException("회원만 접근 가능한 서비스입니다");
-        }
-
-        AuthInfo authInfo = authProvider.validate(credentials.get("credential"), credentials.get("refreshCredential"));
+        AuthInfo authInfo = authProvider.validate(credential);
         request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;
@@ -59,14 +56,12 @@ public class AuthInterceptor implements HandlerInterceptor {
                 );
     }
 
-    private Map<String, String> extractCredential(HttpServletRequest request) {
+    private Optional<String> extractSid(HttpServletRequest request) {
         return Optional.ofNullable(request.getCookies())
                 .stream()
                 .flatMap(Arrays::stream)
-                .filter(cookie -> cookie.getName().startsWith("credential"))
-                .collect(Collectors.toMap(
-                        Cookie::getName,
-                        Cookie::getValue
-                ));
+                .filter(cookie -> "sid".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
     }
 }
