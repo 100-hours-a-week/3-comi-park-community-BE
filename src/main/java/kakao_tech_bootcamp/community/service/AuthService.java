@@ -8,7 +8,6 @@ import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<ResponseCookie> issue(AuthRequestDto dto) {
+    public List<Credential> issue(AuthRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -33,24 +32,15 @@ public class AuthService {
             throw new NotFoundException("회원을 찾을 수 없습니다");
         }
 
-        return authProvider.issue(member).stream().map(this::createCookie).toList();
+        return authProvider.issue(member);
     }
 
     public AuthInfo validate(String credential, String refreshCredential) {
         return authProvider.validate(credential, refreshCredential);
     }
 
-    public List<ResponseCookie> invalidate(String credential, String refreshCredential) {
-        return authProvider.invalidate(credential, refreshCredential).stream().map(this::createCookie).toList();
+    public List<Credential> invalidate(String credential, String refreshCredential) {
+        return authProvider.invalidate(credential, refreshCredential);
     }
 
-    private ResponseCookie createCookie(Credential credential) {
-        return ResponseCookie.from(credential.getName(), credential.getValue())
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path(credential.getPath())
-                .maxAge(credential.getTtlSeconds())
-                .build();
-    }
 }
