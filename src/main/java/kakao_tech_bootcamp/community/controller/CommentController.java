@@ -4,7 +4,7 @@ import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.CommentRequestDto;
 import kakao_tech_bootcamp.community.dto.CommentResponseDto;
-import kakao_tech_bootcamp.community.service.AuthInfo;
+import kakao_tech_bootcamp.community.authProvider.AuthInfo;
 import kakao_tech_bootcamp.community.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -2,7 +2,7 @@ package kakao_tech_bootcamp.community.controller;
 
 import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
-import kakao_tech_bootcamp.community.service.AuthInfo;
+import kakao_tech_bootcamp.community.authProvider.AuthInfo;
 import kakao_tech_bootcamp.community.service.MemberPostLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

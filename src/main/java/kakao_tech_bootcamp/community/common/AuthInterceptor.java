@@ -3,9 +3,9 @@ package kakao_tech_bootcamp.community.common;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kakao_tech_bootcamp.community.authProvider.AuthProvider;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
-import kakao_tech_bootcamp.community.service.AuthInfo;
-import kakao_tech_bootcamp.community.service.AuthStrategy;
+import kakao_tech_bootcamp.community.authProvider.AuthInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
-    private final AuthStrategy authStrategy;
+    private final AuthProvider authProvider;
     private static final Map<String, String> EXCLUDE_PATHS = Map.of(
             "/auth", "POST",
             "/members", "POST",
@@ -35,7 +35,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         String credential = extractCredential(request)
                 .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
 
-        AuthInfo authInfo = authStrategy.validate(credential);
+        AuthInfo authInfo = authProvider.validate(credential);
         request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;

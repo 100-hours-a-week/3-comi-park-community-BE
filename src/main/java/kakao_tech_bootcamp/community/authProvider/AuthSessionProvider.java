@@ -1,4 +1,4 @@
-package kakao_tech_bootcamp.community.service;
+package kakao_tech_bootcamp.community.authProvider;
 
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
@@ -9,15 +9,13 @@ import kakao_tech_bootcamp.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-//@Service
 @RequiredArgsConstructor
-public class AuthSessionStrategy implements AuthStrategy {
+public class AuthSessionProvider implements AuthProvider {
     private final static int SESSION_LIMIT = 5;
 
     private final SessionRepository sessionRepository;

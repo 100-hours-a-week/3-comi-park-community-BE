@@ -6,7 +6,7 @@ import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
 import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.PostResponseDto;
 import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
-import kakao_tech_bootcamp.community.service.AuthInfo;
+import kakao_tech_bootcamp.community.authProvider.AuthInfo;
 import kakao_tech_bootcamp.community.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

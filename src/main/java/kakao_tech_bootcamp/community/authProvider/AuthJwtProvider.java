@@ -1,4 +1,4 @@
-package kakao_tech_bootcamp.community.service;
+package kakao_tech_bootcamp.community.authProvider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -21,7 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AuthJwtStrategy implements AuthStrategy {
+public class AuthJwtProvider implements AuthProvider {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProperties jwtProperties ;
