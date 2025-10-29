@@ -76,6 +76,20 @@ public class AuthJwtService {
         }
     }
 
+    public String reIssue(String refreshToken) {
+        try {
+            Claims body = Jwts.parserBuilder()
+                    .setSigningKey(jwtProperties.getSecretKey()).build()
+                    .parseClaimsJws(refreshToken).getBody();
+
+            return issueCredential((Integer) body.get("id"), (String) body.get("email"));
+        } catch (ExpiredJwtException e) {
+            throw new UnauthorizedException("인증 정보가 만료됐습니다");
+        } catch (SignatureException e) {
+            throw new UnauthorizedException("인증 정보가 유효하지 않습니다");
+        }
+    }
+
     private String createJwtToken(Integer memberId, String email, long ttlSeconds) {
         return Jwts.builder()
                 .setIssuer(jwtProperties.getIssuer())

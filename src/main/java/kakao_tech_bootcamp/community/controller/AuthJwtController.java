@@ -55,6 +55,15 @@ public class AuthJwtController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<Void>> reLogin(@CookieValue(value = "refreshToken") String refreshToken) {
+        String accessToken = authJwtService.reIssue(refreshToken);
+        ResponseCookie accessTokenCookie = createCookie("accessToken", accessToken, ACCESS_TOKEN_PATH, 60 * 15); // 15분
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header(SET_COOKIE, accessTokenCookie.toString())
+                .body(ApiResponse.success());
+    }
+
     private ResponseCookie createCookie(String key, String value, String path, long maxAge) {
         return ResponseCookie.from(key, value)
                 .httpOnly(true)
