@@ -23,7 +23,7 @@ public class AuthJwtController {
     private final AuthJwtService authJwtService;
 
     private final static String ACCESS_TOKEN_PATH = "/";
-    private final static String REFRESH_TOKEN_PATH = "/auth/jwt/refresh";
+    private final static String REFRESH_TOKEN_PATH = "/auth/jwt";
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> login(@RequestBody @Validated AuthRequestDto authRequestDto) {
