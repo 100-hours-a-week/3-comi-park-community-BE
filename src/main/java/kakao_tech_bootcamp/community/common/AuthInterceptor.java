@@ -18,15 +18,10 @@ import java.util.Optional;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
     private static final Map<String, String> PUBLIC_ENDPOINT = Map.of(
-            "/auth", "POST",
             "/members", "POST",
             "/members/availability/email", "POST",
             "/members/availability/nickname", "POST",
-            "/images/members", "POST",
-            "/terms", "GET",
-            "/privacy", "GET",
-            "/style.css", "GET",
-            "/header.css", "GET"
+            "/images/members", "POST"
     );
     private final AuthStrategy authStrategy;
 
@@ -41,10 +36,6 @@ public class AuthInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
 
         if ("OPTIONS".equals(method)) {
-            return true;
-        }
-
-        if (uri.startsWith("/s3/members")) {
             return true;
         }
 
