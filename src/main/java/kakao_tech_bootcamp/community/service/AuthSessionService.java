@@ -16,14 +16,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AuthSessionStrategy implements AuthStrategy {
+public class AuthSessionService {
     private final static int SESSION_LIMIT = 5;
 
     private final SessionRepository sessionRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Override
     public String issue(AuthRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
@@ -56,7 +55,6 @@ public class AuthSessionStrategy implements AuthStrategy {
         return sessionId;
     }
 
-    @Override
     public AuthInfo validate(String credential) {
         AuthInfo session = sessionRepository.findById(credential)
                 .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
@@ -69,7 +67,6 @@ public class AuthSessionStrategy implements AuthStrategy {
         return session;
     }
 
-    @Override
     public void invalidate(String credential) {
         // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
         sessionRepository.deleteById(credential);

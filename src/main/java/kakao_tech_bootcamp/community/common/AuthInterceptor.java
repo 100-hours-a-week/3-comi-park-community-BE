@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthJwtService;
-import kakao_tech_bootcamp.community.service.AuthStrategy;
+import kakao_tech_bootcamp.community.service.AuthSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -24,7 +24,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             "/members/availability/nickname", "POST",
             "/images/members", "POST"
     );
-    private final AuthStrategy authSessionService;
+    private final AuthSessionService authSessionService;
     private final AuthJwtService authJwtService;
 
     @Override

@@ -3,7 +3,7 @@ package kakao_tech_bootcamp.community.controller;
 import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
-import kakao_tech_bootcamp.community.service.AuthStrategy;
+import kakao_tech_bootcamp.community.service.AuthSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -16,14 +16,14 @@ import java.util.Map;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/session")
 @RequiredArgsConstructor
-public class AuthController {
-    private final AuthStrategy authStrategy;
+public class AuthSessionController {
+    private final AuthSessionService authSessionService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody @Validated AuthRequestDto authRequestDto) {
-        String sessionId = authStrategy.issue(authRequestDto);
+    public ResponseEntity<ApiResponse<Void>> login(@RequestBody @Validated AuthRequestDto authRequestDto) {
+        String sessionId = authSessionService.issue(authRequestDto);
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
                 .httpOnly(true)
                 .sameSite("None")
@@ -38,7 +38,7 @@ public class AuthController {
 
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
-        authStrategy.invalidate(sessionId);
+        authSessionService.invalidate(sessionId);
 
         ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
                 .httpOnly(true)
@@ -55,7 +55,7 @@ public class AuthController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("sid") String sessionId) {
-        AuthInfo session = authStrategy.validate(sessionId);
+        AuthInfo session = authSessionService.validate(sessionId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
     }
 }
