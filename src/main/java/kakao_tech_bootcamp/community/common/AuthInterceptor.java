@@ -5,17 +5,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.service.AuthInfo;
+import kakao_tech_bootcamp.community.service.AuthJwtService;
 import kakao_tech_bootcamp.community.service.AuthStrategy;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-@Log4j2
 @Component
+@RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
     private static final Map<String, String> PUBLIC_ENDPOINT = Map.of(
             "/members", "POST",
@@ -24,11 +25,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             "/images/members", "POST"
     );
     private final AuthStrategy authStrategy;
-
-    @Autowired
-    public AuthInterceptor(AuthStrategy authStrategy) {
-        this.authStrategy = authStrategy;
-    }
+    private final AuthJwtService authJwtService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -43,30 +40,30 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String credential = findCredential(request)
+        AuthInfo authInfo = extractSid(request)
+                .map(authStrategy::validate)
+                .or(() -> extractAccessToken(request).map(authJwtService::validate))
                 .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
-
-        AuthInfo authInfo = authStrategy.validate(credential);
         request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;
     }
 
-    private Optional<String> findCredential(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
+    private Optional<String> extractSid(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies())
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(cookie -> "sid".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
+    }
 
-        if (cookies == null) {
-            return Optional.empty();
-        }
-
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("sid")) {
-                return Optional.ofNullable(cookie.getValue());
-            }
-        }
-
-        // 다른 인증 방법 사용 시 Authorization 헤더 처리 코드 필요
-
-        return Optional.empty();
+    private Optional<String> extractAccessToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies())
+                .stream()
+                .flatMap(Arrays::stream)
+                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
     }
 }
