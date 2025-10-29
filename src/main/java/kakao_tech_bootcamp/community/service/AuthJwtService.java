@@ -40,29 +40,19 @@ public class AuthJwtService {
             throw new NotFoundException("회원을 찾을 수 없습니다");
         }
 
-        return Map.of("accessToken", issueCredential(member.getId(), member.getEmail()),
-                "refreshToken", issueRefreshCredential(member.getId(), member.getEmail()));
+        return Map.of("accessToken", issueAccessToken(member.getId(), member.getEmail()),
+                "refreshToken", issueRefreshToken(member.getId(), member.getEmail()));
     }
 
-    public String issueCredential(Integer memberId, String email) {
-        long accessTtlSeconds = 15 * 60;  // 15분
-        return createJwtToken(memberId, email, accessTtlSeconds);
-    }
-
-    private String issueRefreshCredential(Integer memberId, String email) {
-        long refreshTtlSeconds = 60 * 60 * 24 * 30; // 30일
-        return createJwtToken(memberId, email, refreshTtlSeconds);
-    }
-
-    public AuthInfo validate(String credential) {
-        if (credential == null) {
+    public AuthInfo validate(String accessToken) {
+        if (accessToken == null) {
             throw new UnauthorizedException("인증 정보가 존재하지 않습니다");
         }
 
         try {
             Claims body = Jwts.parserBuilder()
                     .setSigningKey(jwtProperties.getSecretKey()).build()
-                    .parseClaimsJws(credential).getBody();
+                    .parseClaimsJws(accessToken).getBody();
 
             return new AuthInfo(
                     (Integer) body.get("id"),
@@ -82,12 +72,22 @@ public class AuthJwtService {
                     .setSigningKey(jwtProperties.getSecretKey()).build()
                     .parseClaimsJws(refreshToken).getBody();
 
-            return issueCredential((Integer) body.get("id"), (String) body.get("email"));
+            return issueAccessToken((Integer) body.get("id"), (String) body.get("email"));
         } catch (ExpiredJwtException e) {
             throw new UnauthorizedException("인증 정보가 만료됐습니다");
         } catch (SignatureException e) {
             throw new UnauthorizedException("인증 정보가 유효하지 않습니다");
         }
+    }
+
+    private String issueAccessToken(Integer memberId, String email) {
+        long accessTtlSeconds = 15 * 60;  // 15분
+        return createJwtToken(memberId, email, accessTtlSeconds);
+    }
+
+    private String issueRefreshToken(Integer memberId, String email) {
+        long refreshTtlSeconds = 60 * 60 * 24 * 30; // 30일
+        return createJwtToken(memberId, email, refreshTtlSeconds);
     }
 
     private String createJwtToken(Integer memberId, String email, long ttlSeconds) {
