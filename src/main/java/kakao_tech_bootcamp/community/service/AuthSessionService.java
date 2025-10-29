@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.service;
 
+import kakao_tech_bootcamp.community.auth.Session;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
@@ -35,7 +36,7 @@ public class AuthSessionService {
             throw new NotFoundException("회원을 찾을 수 없습니다");
         }
 
-        List<AuthInfo> memberSessions = sessionRepository.findAllByMemberId(member.getId());
+        List<Session> memberSessions = sessionRepository.findAllByMemberId(member.getId());
 
         /*
          각 회원은 로그인 세션 최대 5개까지 유지 가능
@@ -43,12 +44,12 @@ public class AuthSessionService {
          */
         if (memberSessions.size() >= SESSION_LIMIT) {
             memberSessions.stream()
-                    .min(Comparator.comparing(AuthInfo::getCreatedAt))
+                    .min(Comparator.comparing(Session::getCreatedAt))
                     .ifPresent(sessionRepository::delete);
         }
 
         String sessionId = UUID.randomUUID().toString();
-        AuthInfo session = new AuthInfo(member.getId());
+        Session session = new Session(sessionId, member.getId(),member.getEmail());
 
         sessionRepository.save(sessionId, session);
 
@@ -56,15 +57,15 @@ public class AuthSessionService {
     }
 
     public AuthInfo validate(String credential) {
-        AuthInfo session = sessionRepository.findById(credential)
+        Session session = sessionRepository.findById(credential)
                 .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
 
-        if (session.isExpired()) {
+        if (session.isSessionExpired()) {
             sessionRepository.deleteById(credential);
             throw new UnauthorizedException("인증 정보가 만료됐습니다");
         }
 
-        return session;
+        return new AuthInfo(session.getMemberId());
     }
 
     public void invalidate(String credential) {
