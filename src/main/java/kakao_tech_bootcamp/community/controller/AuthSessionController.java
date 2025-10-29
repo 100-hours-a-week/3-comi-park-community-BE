@@ -24,32 +24,18 @@ public class AuthSessionController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> login(@RequestBody @Validated AuthRequestDto authRequestDto) {
         String sessionId = authSessionService.issue(authRequestDto);
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(60 * 60 * 24 * 7) // 일주일
-                .build();
+        ResponseCookie sid = createCookie("sid", sessionId, "/", 60 * 60 * 24 * 7); // 일주일
         return ResponseEntity.status(HttpStatus.CREATED)
-                .header(SET_COOKIE, cookie.toString())
+                .header(SET_COOKIE, sid.toString())
                 .body(ApiResponse.success());
     }
 
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
         authSessionService.invalidate(sessionId);
-
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
+        ResponseCookie sid = createCookie("sid", sessionId, "/", 0);
         return ResponseEntity.status(HttpStatus.OK)
-                .header(SET_COOKIE, cookie.toString())
+                .header(SET_COOKIE, sid.toString())
                 .body(ApiResponse.success());
     }
 
@@ -57,5 +43,15 @@ public class AuthSessionController {
     public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("sid") String sessionId) {
         AuthInfo session = authSessionService.validate(sessionId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
+    }
+
+    private ResponseCookie createCookie(String key, String value, String path, long maxAge) {
+        return ResponseCookie.from(key, value)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path(path)
+                .maxAge(maxAge)
+                .build();
     }
 }
