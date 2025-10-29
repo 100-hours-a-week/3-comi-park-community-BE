@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
@@ -22,8 +23,11 @@ public class AuthSessionController {
     private final AuthSessionService authSessionService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> login(@RequestBody @Validated AuthRequestDto authRequestDto) {
-        String sessionId = authSessionService.issue(authRequestDto);
+    public ResponseEntity<ApiResponse<Void>> login(
+            HttpServletRequest request,
+            @RequestBody @Validated AuthRequestDto authRequestDto) {
+        String userAgent = request.getHeader("user-agent");
+        String sessionId = authSessionService.issue(authRequestDto, userAgent);
         ResponseCookie sid = createCookie("sid", sessionId, "/", 60 * 60 * 24 * 7); // 일주일
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(SET_COOKIE, sid.toString())
@@ -31,8 +35,11 @@ public class AuthSessionController {
     }
 
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue("sid") String sessionId) {
-        authSessionService.invalidate(sessionId);
+    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue(value = "sid", required = false) String sessionId) {
+        if (sessionId != null) {
+            authSessionService.invalidate(sessionId);
+        }
+
         ResponseCookie sid = createCookie("sid", sessionId, "/", 0);
         return ResponseEntity.status(HttpStatus.OK)
                 .header(SET_COOKIE, sid.toString())

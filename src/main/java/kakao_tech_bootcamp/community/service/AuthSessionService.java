@@ -24,7 +24,7 @@ public class AuthSessionService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public String issue(AuthRequestDto dto) {
+    public String issue(AuthRequestDto dto, String userAgent) {
         Member member = memberRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -49,7 +49,7 @@ public class AuthSessionService {
         }
 
         String sessionId = UUID.randomUUID().toString();
-        Session session = new Session(sessionId, member.getId(),member.getEmail());
+        Session session = new Session(sessionId, member.getId(),member.getEmail(), userAgent);
 
         sessionRepository.save(sessionId, session);
 

@@ -9,7 +9,7 @@ public class Session {
     private String sessionId;
     private final Integer memberId;
     private final String memberEmail;
-    private String userAgent; // TODO: request 헤더의 userAgent로 로그인 위치 기록
+    private String userAgent;
     private LocalDateTime createdAt;
     private LocalDateTime expiredAt;
     private final LocalDateTime refreshExpiredAt;
