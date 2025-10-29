@@ -54,11 +54,7 @@ public class AuthJwtService {
                     .setSigningKey(jwtProperties.getSecretKey()).build()
                     .parseClaimsJws(accessToken).getBody();
 
-            return new AuthInfo(
-                    (Integer) body.get("id"),
-                    toLocalDateTime(body.getIssuedAt()),
-                    toLocalDateTime(body.getExpiration())
-            );
+            return new AuthInfo((Integer) body.get("id"));
         } catch (ExpiredJwtException e) {
             throw new UnauthorizedException("인증 정보가 만료됐습니다");
         } catch (SignatureException e) {
