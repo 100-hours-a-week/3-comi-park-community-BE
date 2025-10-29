@@ -24,7 +24,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             "/members/availability/nickname", "POST",
             "/images/members", "POST"
     );
-    private final AuthStrategy authStrategy;
+    private final AuthStrategy authSessionService;
     private final AuthJwtService authJwtService;
 
     @Override
@@ -40,29 +40,20 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        AuthInfo authInfo = extractSid(request)
-                .map(authStrategy::validate)
-                .or(() -> extractAccessToken(request).map(authJwtService::validate))
+        AuthInfo authInfo = extractCredential(request, "sid")
+                .map(authSessionService::validate)
+                .or(() -> extractCredential(request, "accessToken").map(authJwtService::validate))
                 .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
         request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;
     }
 
-    private Optional<String> extractSid(HttpServletRequest request) {
+    private Optional<String> extractCredential(HttpServletRequest request, String name) {
         return Optional.ofNullable(request.getCookies())
                 .stream()
                 .flatMap(Arrays::stream)
-                .filter(cookie -> "sid".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst();
-    }
-
-    private Optional<String> extractAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getCookies())
-                .stream()
-                .flatMap(Arrays::stream)
-                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .filter(cookie -> name.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
     }
