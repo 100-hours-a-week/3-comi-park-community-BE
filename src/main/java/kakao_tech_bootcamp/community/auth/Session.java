@@ -7,24 +7,17 @@ import java.time.LocalDateTime;
 @Getter
 public class Session {
     private String sessionId;
+    private final String refreshId;
     private final Integer memberId;
     private final String memberEmail;
-    private String userAgent;
+    private final String userAgent;
     private LocalDateTime createdAt;
     private LocalDateTime expiredAt;
     private final LocalDateTime refreshExpiredAt;
 
-    public Session(String sessionId, Integer memberId, String memberEmail) {
+    public Session(String sessionId, String refreshId, Integer memberId, String memberEmail, String userAgent) {
         this.sessionId = sessionId;
-        this.memberId = memberId;
-        this.memberEmail = memberEmail;
-        createdAt = LocalDateTime.now();
-        expiredAt = createdAt.plusMinutes(15);
-        refreshExpiredAt = createdAt.plusDays(30);
-    }
-
-    public Session(String sessionId, Integer memberId, String memberEmail, String userAgent) {
-        this.sessionId = sessionId;
+        this.refreshId = refreshId;
         this.memberId = memberId;
         this.memberEmail = memberEmail;
         this.userAgent = userAgent;

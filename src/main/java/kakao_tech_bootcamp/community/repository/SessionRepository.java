@@ -38,4 +38,10 @@ public class SessionRepository {
                 .filter(session -> Objects.equals(session.getMemberId(), memberId))
                 .toList();
     }
+
+    public Optional<Session> findByRefreshId(String refreshId) {
+        return sessions.values().stream()
+                .filter(session -> Objects.equals(session.getRefreshId(), refreshId))
+                .findFirst();
+    }
 }
