@@ -55,12 +55,14 @@ public class MemberController {
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<ApiResponse<Void>> removeMember(@CookieValue("sid") String sessionId,
+    public ResponseEntity<ApiResponse<Void>> removeMember(@CookieValue(value = "sid", required = false) String sessionId,
+                                                          @CookieValue(value = "accessToken", required = false) String accessToken,
                                                           @CurrentMember AuthInfo authInfo,
                                                           @PathVariable Integer memberId) {
         memberService.removeMember(authInfo.getId(), memberId);
 
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
+
+        ResponseCookie sidCookie = ResponseCookie.from("sid", sessionId)
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)
@@ -68,8 +70,18 @@ public class MemberController {
                 .maxAge(0) // 일주일
                 .build();
 
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(0) // 일주일
+                .build();
+
+
         return ResponseEntity.status(HttpStatus.OK)
-                .header(SET_COOKIE, cookie.toString())
+                .header(SET_COOKIE, sidCookie.toString())
+                .header(SET_COOKIE, accessTokenCookie.toString())
                 .body(ApiResponse.success());
     }
 }
