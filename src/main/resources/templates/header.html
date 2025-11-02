@@ -1,13 +1,19 @@
 <html lagn="ko" xmlns:th="http://www.thymeleaf.org">
-<div class="header-container" th:fragment="header-fragment">
+<header th:fragment="header-fragment">
+    <!-- 뒤로가기 버튼 -->
     <div class="header-backward-container">
-        <div class="header-backward-image" onclick="history.back();">◀️</div>
+        <button class="header-backward-btn" aria-label="뒤로가기">
+            <svg class="header-backward-icon" viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
     </div>
-    <div class="title">
-        <div class="title-name">
-            <a th:href="${@environment.getProperty('frontend.domain')} + '/index'">아무 말 대잔치</a>
-        </div>
+
+    <!-- 로고 -->
+    <div class="logo">
+        <a th:href="${@environment.getProperty('frontend.domain')} + '/index'">♡ Gossip Girl ♡</a>
     </div>
+
     <div class="header-profile-container"></div>
-</div>
+</header>
 </html>
