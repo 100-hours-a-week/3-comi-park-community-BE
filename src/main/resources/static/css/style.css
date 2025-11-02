@@ -63,12 +63,84 @@ main .title {
     color: var(--deep-pink);
 }
 
-/* === SECTION, POSTS 영역 === */
+/* === SECTION 영역 === */
 main section {
     width: 60%;
     min-width: 320px;
     max-width: 600px;
     margin: 0 auto;
+}
+
+/* === FOOTER === */
+/* footer는 기본적으로 숨김 상태 */
+footer {
+    position: fixed;
+    bottom: -100px; /* 처음엔 화면 아래에 숨어 있음 */
+    left: 0;
+    width: 100%;
+    background: var(--cream-pink);
+    background-image: url('/static/images/fresh-snow.png');
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    border-top: 2px dashed var(--pink);
+    color: var(--pink-text);
+    font-size: 0.9rem;
+    box-shadow: 0 -3px 10px rgba(255, 182, 193, 0.3);
+    transition:
+        bottom 0.45s cubic-bezier(0.25, 0.1, 0.25, 1.4),
+        background 0.4s ease;
+    z-index: 10;
+    letter-spacing: 0.2px;
+}
+
+/* 스크롤 끝까지 내리면 등장 */
+footer.visible {
+    bottom: 0;
+}
+
+footer a {
+    position: relative;
+    text-decoration: none;
+    color: var(--deep-pink);
+    font-weight: 600;
+    transition:
+        color 0.25s ease,
+        transform 0.25s ease;
+}
+
+footer a:hover {
+    color: var(--hotpink);
+    transform: translateY(-2px);
+}
+
+footer a:hover::before {
+    content: '✨';
+    position: absolute;
+    left: -1.2rem;
+    animation: sparkle 0.8s ease forwards;
+}
+
+/* 반짝이 애니메이션 */
+@keyframes sparkle {
+    0% {
+        opacity: 0;
+        transform: translateY(5px) rotate(0deg);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-3px) rotate(10deg);
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-1px) rotate(-10deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-8px) rotate(0deg);
+    }
 }
 
 /* === COMMON === */
