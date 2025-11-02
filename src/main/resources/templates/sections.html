@@ -25,6 +25,12 @@
     </section>
 </main>
 
+<script th:inline="javascript">
+    const ALLOWED_ORIGINS = [
+        [[${@environment.getProperty('origin.backend')}]],
+        [[${@environment.getProperty('origin.frontend')}]]
+    ];
+</script>
 <script type="module" src="/static/js/sections.js"></script>
 </body>
 </html>
