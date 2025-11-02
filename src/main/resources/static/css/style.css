@@ -69,7 +69,10 @@ main section {
     min-width: 320px;
     max-width: 600px;
     margin: 0 auto;
+    line-height: 1.8rem;
 }
+
+
 
 /* === FOOTER === */
 /* footer는 기본적으로 숨김 상태 */
@@ -148,4 +151,8 @@ a {
     text-decoration: none;
     background-color: inherit;
     color: inherit;
+}
+
+ul {
+    list-style: none;
 }
