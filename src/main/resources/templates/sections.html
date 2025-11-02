@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<header th:insert="header :: headerFragment"></header>
+<header th:insert="~{header :: header-fragment}"></header>
 <main>
     <section>
         <div class="title" th:text="${title}"></div>
