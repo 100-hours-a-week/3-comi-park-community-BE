@@ -36,3 +36,20 @@ jwt:
     key: refreshToken
     path: /auth/jwt
     max-age: 2592000 # 30일
+
+# Session
+session:
+  session-id:
+    key: sid
+    path: /
+    max-age: 900 # 15분
+  refresh-id:
+    key: rid
+    path: /auth/session
+    max-age: 2592000 # 30일
+
+# Cookie
+cookie:
+  http-only: true
+  same-site: LAX
+  secure: false
