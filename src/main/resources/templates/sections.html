@@ -2,14 +2,15 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>아무 말 대잔치</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title>Gossip Girl</title>
 
-    <link rel="stylesheet" th:href="@{/style.css}">
-    <link rel="stylesheet" th:href="@{/header.css}">
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <link rel="stylesheet" th:href="@{/static/css/header.css}">
 </head>
 <body>
 
-<header th:insert="header :: headerFragment"></header>
+<header th:replace="~{header :: header-fragment}"></header>
 <main>
     <section>
         <div class="title" th:text="${title}"></div>
@@ -24,5 +25,12 @@
     </section>
 </main>
 
+<script th:inline="javascript">
+    const ALLOWED_ORIGINS = [
+        [[${@environment.getProperty('origin.backend')}]],
+        [[${@environment.getProperty('origin.frontend')}]]
+    ];
+</script>
+<script type="module" src="/static/js/sections.js"></script>
 </body>
 </html>

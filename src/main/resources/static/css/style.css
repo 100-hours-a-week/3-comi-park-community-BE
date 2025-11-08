@@ -1,0 +1,158 @@
+/* -----------------------------------------
+    Anton Font (SIL Open Font License 1.1)
+    Copyright 2020 The Anton Project Authors
+    https://github.com/googlefonts/AntonFont
+----------------------------------------- */
+
+@font-face {
+    font-family: 'Anton';
+    src: url('/static/fonts/Anton-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('/static/fonts/Pretendard-Regular.woff') format('woff');
+}
+
+:root {
+    --pink: #f9c7d0;
+    --deep-pink: #d94f70;
+    --hotpink: #d6657b;
+    --cream: #fff9f7;
+    --cream-pink: #ffeaf0;
+    --text: #383636;
+    --pink-text: #7b3a45;
+    --shadow: rgba(255, 182, 193, 0.3);
+    --error: #ff7b7b;
+    --valid: #6ac47e;
+}
+
+/* === 전체 레이아웃 설정 === */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--cream);
+    color: var(--text);
+    background-image: url('/static/images/paper-fibers.png');
+    font-family: 'Pretendard', serif;
+}
+
+/* === MAIN === */
+main {
+    flex: 1; /* 남은 공간 모두 차지 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 수평 중앙 */
+    justify-content: center; /* 스크롤 없을 때 수직 중앙 */
+    margin: 3rem 0;
+}
+
+main .title {
+    font-size: 2em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
+    padding-bottom: 3rem;
+    color: var(--deep-pink);
+}
+
+/* === SECTION 영역 === */
+main section {
+    width: 60%;
+    min-width: 320px;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.8rem;
+}
+
+
+
+/* === FOOTER === */
+/* footer는 기본적으로 숨김 상태 */
+footer {
+    position: fixed;
+    bottom: -100px; /* 처음엔 화면 아래에 숨어 있음 */
+    left: 0;
+    width: 100%;
+    background: var(--cream-pink);
+    background-image: url('/static/images/fresh-snow.png');
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    border-top: 2px dashed var(--pink);
+    color: var(--pink-text);
+    font-size: 0.9rem;
+    box-shadow: 0 -3px 10px rgba(255, 182, 193, 0.3);
+    transition:
+        bottom 0.45s cubic-bezier(0.25, 0.1, 0.25, 1.4),
+        background 0.4s ease;
+    z-index: 10;
+    letter-spacing: 0.2px;
+}
+
+/* 스크롤 끝까지 내리면 등장 */
+footer.visible {
+    bottom: 0;
+}
+
+footer a {
+    position: relative;
+    text-decoration: none;
+    color: var(--deep-pink);
+    font-weight: 600;
+    transition:
+        color 0.25s ease,
+        transform 0.25s ease;
+}
+
+footer a:hover {
+    color: var(--hotpink);
+    transform: translateY(-2px);
+}
+
+footer a:hover::before {
+    content: '✨';
+    position: absolute;
+    left: -1.2rem;
+    animation: sparkle 0.8s ease forwards;
+}
+
+/* 반짝이 애니메이션 */
+@keyframes sparkle {
+    0% {
+        opacity: 0;
+        transform: translateY(5px) rotate(0deg);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-3px) rotate(10deg);
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-1px) rotate(-10deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-8px) rotate(0deg);
+    }
+}
+
+/* === COMMON === */
+a {
+    text-decoration: none;
+    background-color: inherit;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}

@@ -30,8 +30,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
+                        "/static/**",
+                        "/s3/members/*",
                         "/auth/**",
-                        "/s3/members/*","/**.css", // static files
                         "/terms", "/privacy" // thymeleaf
                 );
     }
