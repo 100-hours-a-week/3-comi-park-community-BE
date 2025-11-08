@@ -4,10 +4,8 @@ import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
 import kakao_tech_bootcamp.community.dto.*;
 import kakao_tech_bootcamp.community.service.AuthInfo;
-import kakao_tech_bootcamp.community.service.AuthStrategy;
 import kakao_tech_bootcamp.community.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +16,10 @@ import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
-@Log4j2
 @RestController
 @RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberController {
-    private final AuthStrategy authStrategy;
     private final MemberService memberService;
 
     @PostMapping("/availability/email")
@@ -59,12 +55,14 @@ public class MemberController {
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<ApiResponse<Void>> removeMember(@CookieValue("sid") String sessionId,
+    public ResponseEntity<ApiResponse<Void>> removeMember(@CookieValue(value = "sid", required = false) String sessionId,
+                                                          @CookieValue(value = "accessToken", required = false) String accessToken,
                                                           @CurrentMember AuthInfo authInfo,
                                                           @PathVariable Integer memberId) {
         memberService.removeMember(authInfo.getId(), memberId);
 
-        ResponseCookie cookie = ResponseCookie.from("sid", sessionId)
+
+        ResponseCookie sidCookie = ResponseCookie.from("sid", sessionId)
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)
@@ -72,8 +70,18 @@ public class MemberController {
                 .maxAge(0) // 일주일
                 .build();
 
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .path("/")
+                .maxAge(0) // 일주일
+                .build();
+
+
         return ResponseEntity.status(HttpStatus.OK)
-                .header(SET_COOKIE, cookie.toString())
+                .header(SET_COOKIE, sidCookie.toString())
+                .header(SET_COOKIE, accessTokenCookie.toString())
                 .body(ApiResponse.success());
     }
 }

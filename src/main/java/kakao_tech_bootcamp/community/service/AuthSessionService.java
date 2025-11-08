@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.service;
 
+import kakao_tech_bootcamp.community.auth.Session;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
@@ -12,19 +13,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AuthSessionStrategy implements AuthStrategy {
+public class AuthSessionService {
     private final static int SESSION_LIMIT = 5;
 
     private final SessionRepository sessionRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public String issue(AuthRequestDto dto) {
+    public Map<String, String> issue(AuthRequestDto dto, String userAgent) {
         Member member = memberRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
 
@@ -36,7 +37,7 @@ public class AuthSessionStrategy implements AuthStrategy {
             throw new NotFoundException("회원을 찾을 수 없습니다");
         }
 
-        List<AuthInfo> memberSessions = sessionRepository.findAllByMemberId(member.getId());
+        List<Session> memberSessions = sessionRepository.findAllByMemberId(member.getId());
 
         /*
          각 회원은 로그인 세션 최대 5개까지 유지 가능
@@ -44,34 +45,58 @@ public class AuthSessionStrategy implements AuthStrategy {
          */
         if (memberSessions.size() >= SESSION_LIMIT) {
             memberSessions.stream()
-                    .min(Comparator.comparing(AuthInfo::getCreatedAt))
+                    .min(Comparator.comparing(Session::getCreatedAt))
                     .ifPresent(sessionRepository::delete);
         }
 
         String sessionId = UUID.randomUUID().toString();
-        AuthInfo session = new AuthInfo(member.getId());
+        String refreshId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId, refreshId, member.getId(),member.getEmail(), userAgent);
 
+        sessionRepository.save(sessionId, session);
+
+        return Map.of("sessionId", sessionId, "refreshId", refreshId);
+    }
+
+    public AuthInfo validate(String credential) {
+        Session session = sessionRepository.findById(credential)
+                .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
+
+        if (session.isSessionExpired()) {
+            sessionRepository.deleteById(credential);
+            throw new UnauthorizedException("인증 정보가 만료됐습니다");
+        }
+
+        return new AuthInfo(session.getMemberId());
+    }
+
+    public void invalidate(String credential) {
+        // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
+        sessionRepository.deleteById(credential);
+    }
+
+    public String reIssue(String refreshId, String userAgent) {
+        Session session = sessionRepository.findByRefreshId(refreshId)
+                .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
+
+        if (!session.getUserAgent().equals(userAgent)) {
+            throw new UnauthorizedException("이전 인증 정보와 일치하지 않습니다");
+        }
+
+        // 기존 세션 정보 삭제
+        String previousSessionId = session.getSessionId();
+        sessionRepository.deleteById(previousSessionId);
+
+        if (session.isRefreshExpired()) {
+            throw new UnauthorizedException("인증 정보가 만료됐습니다");
+        }
+
+        // 새 세션 저장
+        String sessionId = UUID.randomUUID().toString();
+        session.updateSession(sessionId);
         sessionRepository.save(sessionId, session);
 
         return sessionId;
     }
 
-    @Override
-    public AuthInfo validate(String credential) {
-        AuthInfo session = sessionRepository.findById(credential)
-                .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
-
-        if (session.isExpired()) {
-            sessionRepository.deleteById(credential);
-            throw new UnauthorizedException("인증 정보가 만료됐습니다");
-        }
-
-        return session;
-    }
-
-    @Override
-    public void invalidate(String credential) {
-        // 로그아웃하는 상황에 만약 sessionRepository에 삭제할 세션ID가 없더라도 404 에러를 낼 이유가 없음
-        sessionRepository.deleteById(credential);
-    }
 }
