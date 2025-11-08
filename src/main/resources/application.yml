@@ -24,3 +24,15 @@ servlet:
 logging:
   level:
     org.hibernate.SQL: debug
+
+### 값 설정
+# JWT
+jwt:
+  access-token:
+    key: accessToken
+    path: /
+    max-age: 900 # 15분
+  refresh-token:
+    key: refreshToken
+    path: /auth/jwt
+    max-age: 2592000 # 30일
