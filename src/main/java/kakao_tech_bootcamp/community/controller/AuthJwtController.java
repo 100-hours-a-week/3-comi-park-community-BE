@@ -1,10 +1,12 @@
 package kakao_tech_bootcamp.community.controller;
 
 import kakao_tech_bootcamp.community.common.ApiResponse;
+import kakao_tech_bootcamp.community.common.jwt.JwtProperties;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthJwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -20,17 +22,32 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @RequestMapping("/auth/jwt")
 @RequiredArgsConstructor
 public class AuthJwtController {
+    private final JwtProperties jwtProperties;
     private final AuthJwtService authJwtService;
 
-    private final static String ACCESS_TOKEN_PATH = "/";
-    private final static String REFRESH_TOKEN_PATH = "/auth/jwt";
+    @Value("${cookie.http-only}")
+    private static boolean httpOnly;
+    @Value("${cookie.same-site}")
+    private static String sameSite;
+    @Value("${cookie.secure}")
+    private static boolean secure;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> login(@RequestBody @Validated AuthRequestDto authRequestDto) {
         Map<String, String> credentials = authJwtService.issue(authRequestDto);
 
-        ResponseCookie accessTokenCookie = createCookie("accessToken", credentials.get("accessToken"), ACCESS_TOKEN_PATH, 60 * 15); // 15분
-        ResponseCookie refreshTokenCookie = createCookie("refreshToken", credentials.get("refreshToken"), REFRESH_TOKEN_PATH, 60 * 60 * 24 * 30); // 30일
+        ResponseCookie accessTokenCookie = createCookie(
+                jwtProperties.getAccessToken().getKey(),
+                credentials.get(jwtProperties.getAccessToken().getKey()),
+                jwtProperties.getAccessToken().getPath(),
+                jwtProperties.getAccessToken().getMaxAge()
+        );
+        ResponseCookie refreshTokenCookie = createCookie(
+                jwtProperties.getRefreshToken().getKey(),
+                credentials.get(jwtProperties.getRefreshToken().getKey()),
+                jwtProperties.getRefreshToken().getPath(),
+                jwtProperties.getRefreshToken().getMaxAge()
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(SET_COOKIE, accessTokenCookie.toString())
@@ -40,8 +57,8 @@ public class AuthJwtController {
 
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> logout(@CookieValue(value = "accessToken", required = false) String accessToken, @CookieValue("refreshToken") String refreshToken) {
-        ResponseCookie accessTokenCookie = createCookie("accessToken", accessToken, ACCESS_TOKEN_PATH, 0);
-        ResponseCookie refreshTokenCookie = createCookie("refreshToken", refreshToken, REFRESH_TOKEN_PATH, 0);
+        ResponseCookie accessTokenCookie = destroyCookie(jwtProperties.getAccessToken().getKey(), jwtProperties.getAccessToken().getPath());
+        ResponseCookie refreshTokenCookie = destroyCookie(jwtProperties.getRefreshToken().getKey(), jwtProperties.getRefreshToken().getPath());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .header(SET_COOKIE, accessTokenCookie.toString())
@@ -58,7 +75,13 @@ public class AuthJwtController {
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<Void>> reLogin(@CookieValue(value = "refreshToken") String refreshToken) {
         String accessToken = authJwtService.reIssue(refreshToken);
-        ResponseCookie accessTokenCookie = createCookie("accessToken", accessToken, ACCESS_TOKEN_PATH, 60 * 15); // 15분
+        ResponseCookie accessTokenCookie = createCookie(
+                jwtProperties.getAccessToken().getKey(),
+                accessToken,
+                jwtProperties.getAccessToken().getPath(),
+                jwtProperties.getAccessToken().getMaxAge()
+        );
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(SET_COOKIE, accessTokenCookie.toString())
                 .body(ApiResponse.success());
@@ -66,11 +89,15 @@ public class AuthJwtController {
 
     private ResponseCookie createCookie(String key, String value, String path, long maxAge) {
         return ResponseCookie.from(key, value)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
+                .httpOnly(httpOnly)
+                .sameSite(sameSite)
+                .secure(secure)
                 .path(path)
                 .maxAge(maxAge)
                 .build();
+    }
+
+    private ResponseCookie destroyCookie(String key, String path) {
+        return createCookie(key, "", path, 0);
     }
 }

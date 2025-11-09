@@ -6,14 +6,14 @@
 
 @font-face {
     font-family: 'Anton';
-    src: url('/static/fonts/Anton-Regular.ttf') format('truetype');
+    src: url('/api/static/fonts/Anton-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Pretendard';
-    src: url('/static/fonts/Pretendard-Regular.woff') format('woff');
+    src: url('/api/static/fonts/Pretendard-Regular.woff') format('woff');
 }
 
 :root {
@@ -38,7 +38,7 @@ body {
     flex-direction: column;
     background-color: var(--cream);
     color: var(--text);
-    background-image: url('/static/images/paper-fibers.png');
+    background-image: url('/api/static/images/paper-fibers.png');
     font-family: 'Pretendard', serif;
 }
 
@@ -82,7 +82,7 @@ footer {
     left: 0;
     width: 100%;
     background: var(--cream-pink);
-    background-image: url('/static/images/fresh-snow.png');
+    background-image: url('/api/static/images/fresh-snow.png');
     display: flex;
     justify-content: center;
     gap: 2rem;

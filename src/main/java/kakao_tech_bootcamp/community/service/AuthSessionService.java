@@ -55,7 +55,7 @@ public class AuthSessionService {
 
         sessionRepository.save(sessionId, session);
 
-        return Map.of("sessionId", sessionId, "refreshId", refreshId);
+        return Map.of("sid", sessionId, "rid", refreshId);
     }
 
     public AuthInfo validate(String credential) {

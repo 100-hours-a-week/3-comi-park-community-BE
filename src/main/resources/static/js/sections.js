@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     paintFooter(bodyElement, mainElement);
 
     bodyElement.querySelector('.header-backward-btn').addEventListener('click', () => {
-        if (ALLOWED_ORIGINS.some(origin => document.referrer.includes(origin))) {
-            history.back();
-        }
+        history.back();
     });
 });

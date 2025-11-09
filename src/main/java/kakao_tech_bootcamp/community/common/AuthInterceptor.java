@@ -19,10 +19,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
     private static final Map<String, String> PUBLIC_ENDPOINT = Map.of(
-            "/members", "POST",
-            "/members/availability/email", "POST",
-            "/members/availability/nickname", "POST",
-            "/images/members", "POST"
+            "/api/members", "POST",
+            "/api/members/availability/email", "POST",
+            "/api/members/availability/nickname", "POST",
+            "/api/images/members", "POST"
     );
     private final AuthSessionService authSessionService;
     private final AuthJwtService authJwtService;

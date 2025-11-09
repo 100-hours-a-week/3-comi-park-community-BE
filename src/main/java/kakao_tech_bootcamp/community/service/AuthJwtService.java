@@ -2,12 +2,10 @@ package kakao_tech_bootcamp.community.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
-import kakao_tech_bootcamp.community.common.JwtProperties;
 import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
 import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
+import kakao_tech_bootcamp.community.common.jwt.JwtProvider;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
@@ -15,16 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class AuthJwtService {
-    private final JwtProperties jwtProperties;
+    private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -40,8 +34,8 @@ public class AuthJwtService {
             throw new NotFoundException("회원을 찾을 수 없습니다");
         }
 
-        return Map.of("accessToken", issueAccessToken(member.getId(), member.getEmail()),
-                "refreshToken", issueRefreshToken(member.getId(), member.getEmail()));
+        return Map.of("accessToken", jwtProvider.issueAccessToken(member.getId(), member.getEmail()),
+                "refreshToken", jwtProvider.issueRefreshToken(member.getId(), member.getEmail()));
     }
 
     public AuthInfo validate(String accessToken) {
@@ -50,10 +44,7 @@ public class AuthJwtService {
         }
 
         try {
-            Claims body = Jwts.parserBuilder()
-                    .setSigningKey(jwtProperties.getSecretKey()).build()
-                    .parseClaimsJws(accessToken).getBody();
-
+            Claims body = jwtProvider.parse(accessToken).getBody();
             return new AuthInfo((Integer) body.get("id"));
         } catch (ExpiredJwtException e) {
             throw new UnauthorizedException("인증 정보가 만료됐습니다");
@@ -64,40 +55,12 @@ public class AuthJwtService {
 
     public String reIssue(String refreshToken) {
         try {
-            Claims body = Jwts.parserBuilder()
-                    .setSigningKey(jwtProperties.getSecretKey()).build()
-                    .parseClaimsJws(refreshToken).getBody();
-
-            return issueAccessToken((Integer) body.get("id"), (String) body.get("email"));
+            Claims body = jwtProvider.parse(refreshToken).getBody();
+            return jwtProvider.issueAccessToken((Integer) body.get("id"), (String) body.get("email"));
         } catch (ExpiredJwtException e) {
             throw new UnauthorizedException("인증 정보가 만료됐습니다");
         } catch (SignatureException e) {
             throw new UnauthorizedException("인증 정보가 유효하지 않습니다");
         }
-    }
-
-    private String issueAccessToken(Integer memberId, String email) {
-        long accessTtlSeconds = 15 * 60;  // 15분
-        return createJwtToken(memberId, email, accessTtlSeconds);
-    }
-
-    private String issueRefreshToken(Integer memberId, String email) {
-        long refreshTtlSeconds = 60 * 60 * 24 * 30; // 30일
-        return createJwtToken(memberId, email, refreshTtlSeconds);
-    }
-
-    private String createJwtToken(Integer memberId, String email, long ttlSeconds) {
-        return Jwts.builder()
-                .setIssuer(jwtProperties.getIssuer())
-                .claim("id", memberId)
-                .claim("email", email)
-                .setIssuedAt(new Date())
-                .setExpiration(Date.from(Instant.now().plusSeconds(ttlSeconds)))
-                .signWith(jwtProperties.getSecretKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    private LocalDateTime toLocalDateTime(Date date) {
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 }

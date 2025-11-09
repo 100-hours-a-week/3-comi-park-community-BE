@@ -2,10 +2,12 @@ package kakao_tech_bootcamp.community.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kakao_tech_bootcamp.community.common.ApiResponse;
+import kakao_tech_bootcamp.community.common.session.SessionProperties;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthSessionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +22,15 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @RequestMapping("/auth/session")
 @RequiredArgsConstructor
 public class AuthSessionController {
+    private final SessionProperties sessionProperties;
     private final AuthSessionService authSessionService;
 
-    private final static String SID_PATH = "/";
-    private final static String RID_PATH = "/auth/session";
+    @Value("${cookie.http-only}")
+    private static boolean httpOnly;
+    @Value("${cookie.same-site}")
+    private static String sameSite;
+    @Value("${cookie.secure}")
+    private static boolean secure;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> login(
@@ -32,8 +39,18 @@ public class AuthSessionController {
         String userAgent = request.getHeader("user-agent");
         Map<String, String> credentials = authSessionService.issue(authRequestDto, userAgent);
 
-        ResponseCookie sid = createCookie("sid", credentials.get("sessionId"), SID_PATH, 60 * 15); // 15분
-        ResponseCookie rid = createCookie("rid", credentials.get("refreshId"), RID_PATH, 60 * 60 * 24 * 20); // 일주일
+        ResponseCookie sid = createCookie(
+                sessionProperties.getSessionId().getKey(),
+                credentials.get(sessionProperties.getSessionId().getKey()),
+                sessionProperties.getSessionId().getPath(),
+                sessionProperties.getSessionId().getMaxAge()
+        );
+        ResponseCookie rid = createCookie(
+                sessionProperties.getRefreshId().getKey(),
+                credentials.get(sessionProperties.getRefreshId().getKey()),
+                sessionProperties.getRefreshId().getPath(),
+                sessionProperties.getRefreshId().getMaxAge()
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(SET_COOKIE, sid.toString())
@@ -50,8 +67,9 @@ public class AuthSessionController {
             authSessionService.invalidate(sessionId);
         }
 
-        ResponseCookie sid = createCookie("sid", sessionId, SID_PATH, 0);
-        ResponseCookie rid = createCookie("rid", refreshId, RID_PATH, 0);
+        ResponseCookie sid = destroyCookie(sessionProperties.getSessionId().getKey(), sessionProperties.getSessionId().getPath());
+        ResponseCookie rid = destroyCookie(sessionProperties.getRefreshId().getKey(), sessionProperties.getRefreshId().getPath());
+
         return ResponseEntity.status(HttpStatus.OK)
                 .header(SET_COOKIE, sid.toString())
                 .header(SET_COOKIE, rid.toString())
@@ -71,7 +89,12 @@ public class AuthSessionController {
         String userAgent = request.getHeader("user-agent");
         String sessionId = authSessionService.reIssue(refreshId, userAgent);
 
-        ResponseCookie sid = createCookie("sid", sessionId, SID_PATH, 60 * 15); // 15분
+        ResponseCookie sid = createCookie(
+                sessionProperties.getSessionId().getKey(),
+                sessionId,
+                sessionProperties.getSessionId().getPath(),
+                sessionProperties.getSessionId().getMaxAge()
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(SET_COOKIE, sid.toString())
@@ -80,11 +103,15 @@ public class AuthSessionController {
 
     private ResponseCookie createCookie(String key, String value, String path, long maxAge) {
         return ResponseCookie.from(key, value)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
+                .httpOnly(httpOnly)
+                .sameSite(sameSite)
+                .secure(secure)
                 .path(path)
                 .maxAge(maxAge)
                 .build();
+    }
+
+    private ResponseCookie destroyCookie(String key, String path) {
+        return createCookie(key, "", path, 0);
     }
 }
