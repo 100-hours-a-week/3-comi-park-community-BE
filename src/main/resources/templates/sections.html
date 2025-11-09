@@ -5,8 +5,8 @@
     <meta name="robots" content="noindex, nofollow">
     <title>Gossip Girl</title>
 
-    <link rel="stylesheet" th:href="@{/static/css/style.css}">
-    <link rel="stylesheet" th:href="@{/static/css/header.css}">
+    <link rel="stylesheet" th:href="@{/api/static/css/style.css}">
+    <link rel="stylesheet" th:href="@{/api/static/css/header.css}">
 </head>
 <body>
 
@@ -25,12 +25,6 @@
     </section>
 </main>
 
-<script th:inline="javascript">
-    const ALLOWED_ORIGINS = [
-        [[${@environment.getProperty('origin.backend')}]],
-        [[${@environment.getProperty('origin.frontend')}]]
-    ];
-</script>
-<script type="module" src="/static/js/sections.js"></script>
+<script type="module" src="/api/static/js/sections.js"></script>
 </body>
 </html>

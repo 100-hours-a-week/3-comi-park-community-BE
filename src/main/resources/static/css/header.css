@@ -5,7 +5,7 @@ header {
     justify-content: space-evenly;
     padding: 1.8rem 4rem; /* 여백 늘려서 너무 양쪽 끝으로 안 붙게 */
     background-color: #ffeaf0;
-    background-image: url('/static/images/fresh-snow.png');
+    background-image: url('/api/static/images/fresh-snow.png');
     border-bottom: 1px dashed var(--pink);
     box-shadow: 0 4px 10px var(--shadow);
     position: sticky;

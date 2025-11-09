@@ -9,8 +9,8 @@ const createAnchorElement = (href, content) => {
 export const paintFooter = (parentElement, mainElement) => {
     const footerElement = document.createElement('footer');
 
-    footerElement.appendChild(createAnchorElement('/terms', '이용약관'));
-    footerElement.appendChild(createAnchorElement('/privacy', '개인정보처리방침'));
+    footerElement.appendChild(createAnchorElement('/api/terms', '이용약관'));
+    footerElement.appendChild(createAnchorElement('/api/privacy', '개인정보처리방침'));
 
     parentElement.appendChild(footerElement);
 
