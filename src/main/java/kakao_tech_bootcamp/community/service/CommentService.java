@@ -1,7 +1,9 @@
 package kakao_tech_bootcamp.community.service;
 
-import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.CommentExceptionCode;
+import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
+import kakao_tech_bootcamp.community.common.exceptions.code.PostExceptionCode;
 import kakao_tech_bootcamp.community.dto.CommentRequestDto;
 import kakao_tech_bootcamp.community.dto.CommentResponseDto;
 import kakao_tech_bootcamp.community.entity.Comment;
@@ -31,8 +33,8 @@ public class CommentService {
     private final PostStatService postStatService;
 
     public Map<String, Object> saveComment(Integer currentMemberId, Integer postId, CommentRequestDto dto) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
-        Member member = memberRepository.findById(currentMemberId).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
+        Member member = memberRepository.findById(currentMemberId).orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
         Comment comment = commentRepository.save(new Comment(post, member, dto.getContent()));
 
         PostStat postStat = postStatService.findPostStat(post)
@@ -44,7 +46,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentResponseDto> findComments(Integer postId, Integer lastCommentId, Integer limit) {
-        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
         Pageable pageable = PageRequest.of(0, limit);
         List<Comment> comments = lastCommentId == null
@@ -55,11 +57,11 @@ public class CommentService {
     }
 
     public Map<String, Object> modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
-        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
+        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(CommentExceptionCode.NOT_FOUND));
 
         if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
-            throw new ForbiddenException("댓글을 작성한 회원만 수정할 수 있습니다");
+            throw new CustomException(CommentExceptionCode.FORBIDDEN_UPDATE);
         }
 
         comment.changeContent(dto.getContent());
@@ -68,11 +70,11 @@ public class CommentService {
     }
 
     public int removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(CommentExceptionCode.NOT_FOUND));
 
         if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
-            throw new ForbiddenException("댓글을 작성한 회원만 삭제할 수 있습니다");
+            throw new CustomException(CommentExceptionCode.FORBIDDEN_DELETE);
         }
 
         PostStat postStat = postStatService.findPostStat(post)

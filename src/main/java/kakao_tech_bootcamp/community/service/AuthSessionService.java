@@ -1,8 +1,9 @@
 package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.auth.Session;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
-import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.AuthExceptionCode;
+import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.dto.AuthRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.SessionRepository;
@@ -27,14 +28,14 @@ public class AuthSessionService {
 
     public Map<String, String> issue(AuthRequestDto dto, String userAgent) {
         Member member = memberRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
 
         /*
          회원을 인증할 수 없다는 401이 논리적으로 옳을 수 있지만
          보안을 고려하여 이메일/비밀번호 중 무엇이 틀렸는지 힌트를 주지 않기 위해 404로 통일
          */
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
-            throw new NotFoundException("회원을 찾을 수 없습니다");
+            throw new CustomException(MemberExceptionCode.NOT_FOUND);
         }
 
         List<Session> memberSessions = sessionRepository.findAllByMemberId(member.getId());
@@ -60,11 +61,11 @@ public class AuthSessionService {
 
     public AuthInfo validate(String credential) {
         Session session = sessionRepository.findById(credential)
-                .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(AuthExceptionCode.MISSING_AUTH));
 
         if (session.isSessionExpired()) {
             sessionRepository.deleteById(credential);
-            throw new UnauthorizedException("인증 정보가 만료됐습니다");
+            throw new CustomException(AuthExceptionCode.EXPIRED_AUTH);
         }
 
         return new AuthInfo(session.getMemberId());
@@ -77,10 +78,10 @@ public class AuthSessionService {
 
     public String reIssue(String refreshId, String userAgent) {
         Session session = sessionRepository.findByRefreshId(refreshId)
-                .orElseThrow(() -> new NotFoundException("인증 정보를 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(AuthExceptionCode.MISSING_AUTH));
 
         if (!session.getUserAgent().equals(userAgent)) {
-            throw new UnauthorizedException("이전 인증 정보와 일치하지 않습니다");
+            throw new CustomException(AuthExceptionCode.UNMATCHED_AUTH);
         }
 
         // 기존 세션 정보 삭제
@@ -88,7 +89,7 @@ public class AuthSessionService {
         sessionRepository.deleteById(previousSessionId);
 
         if (session.isRefreshExpired()) {
-            throw new UnauthorizedException("인증 정보가 만료됐습니다");
+            throw new CustomException(AuthExceptionCode.EXPIRED_AUTH);
         }
 
         // 새 세션 저장

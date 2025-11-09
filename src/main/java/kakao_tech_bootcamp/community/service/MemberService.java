@@ -1,9 +1,7 @@
 package kakao_tech_bootcamp.community.service;
 
-import kakao_tech_bootcamp.community.common.exceptions.BadRequestException;
-import kakao_tech_bootcamp.community.common.exceptions.ConflictException;
-import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.dto.*;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
@@ -29,28 +27,28 @@ public class MemberService {
     @Transactional(readOnly = true)
     public void existsByEmail(MemberAvailabilityDto memberAvailabilityDto) {
         if (memberRepository.existsByEmail(memberAvailabilityDto.getEmail())) {
-            throw new ConflictException("중복된 이메일입니다");
+            throw new CustomException(MemberExceptionCode.DUPLICATED_EMAIL);
         }
     }
 
     @Transactional(readOnly = true)
     public void existsByNickname(MemberAvailabilityDto memberAvailabilityDto) {
         if (memberRepository.existsByNickname(memberAvailabilityDto.getNickname())) {
-            throw new ConflictException("중복된 닉네임입니다");
+            throw new CustomException(MemberExceptionCode.DUPLICATED_NICKNAME);
         }
     }
 
     public MemberResponseDto saveMember(MemberCreateRequestDto dto) {
         if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
-            throw new BadRequestException("비밀번호가 일치하지 않습니다");
+            throw new CustomException(MemberExceptionCode.UNMATCHED_PASSWORD);
         }
 
         if (memberRepository.existsByEmail(dto.getEmail())) {
-            throw new ConflictException("중복된 이메일입니다");
+            throw new CustomException(MemberExceptionCode.DUPLICATED_EMAIL);
         }
 
         if (memberRepository.existsByNickname(dto.getNickname())) {
-            throw new ConflictException("중복된 닉네임입니다");
+            throw new CustomException(MemberExceptionCode.DUPLICATED_NICKNAME);
         }
 
         Image image = dto.getImage() != null
@@ -65,23 +63,23 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public MemberResponseDto findMember(Integer id) {
-        Member member = memberRepository.findById(id).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+        Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
         return MemberResponseDto.of(member);
     }
 
     public Map<String, Object> modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
         if (!Objects.equals(currentMemberId, id)) {
-            throw new ForbiddenException("회원 본인 정보에 대해서만 수정할 수 있습니다");
+            throw new CustomException(MemberExceptionCode.FORBIDDEN_UPDATE);
         }
 
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
 
         Map<String, Object> changes = new HashMap<>();
 
         if (dto.getPassword() != null) {
             if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
-                throw new BadRequestException("비밀번호가 일치하지 않습니다");
+                throw new CustomException(MemberExceptionCode.UNMATCHED_PASSWORD);
             }
 
             member.changePassword(passwordEncoder.encode(dto.getPassword()));
@@ -129,11 +127,11 @@ public class MemberService {
 
     public void removeMember(Integer currentMemberId, Integer id) {
         if (!Objects.equals(currentMemberId, id)) {
-            throw new ForbiddenException("회원 본인만 탈퇴할 수 있습니다");
+            throw new CustomException(MemberExceptionCode.FORBIDDEN_DELETE);
         }
 
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
 
         memberRepository.delete(member); // image on delete cascade
 

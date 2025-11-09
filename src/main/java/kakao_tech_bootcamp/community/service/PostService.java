@@ -1,7 +1,8 @@
 package kakao_tech_bootcamp.community.service;
 
-import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
+import kakao_tech_bootcamp.community.common.exceptions.code.PostExceptionCode;
 import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
 import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.PostResponseDto;
@@ -31,7 +32,7 @@ public class PostService {
 
     public PostResponseDto savePost(Integer currentMemberId, PostCreateRequestDto dto) {
         Member member = memberRepository.findById(currentMemberId)
-                .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
 
         Image image = dto.getImage() != null
                 ? imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE)
@@ -53,7 +54,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponseDto findPost(Integer currentMemberId, Integer postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
         boolean isLiked = memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 
@@ -70,10 +71,10 @@ public class PostService {
     }
 
     public Map<String, Object> modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
         if (!Objects.equals(post.getMember().getId(), currentMemberId)) {
-            throw new ForbiddenException("게시글을 작성한 회원만 수정할 수 있습니다");
+            throw new CustomException(PostExceptionCode.FORBIDDEN_UPDATE);
         }
 
         Map<String, Object> changes = new HashMap<>();

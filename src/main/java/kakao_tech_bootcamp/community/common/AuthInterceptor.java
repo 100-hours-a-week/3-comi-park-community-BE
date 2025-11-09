@@ -3,7 +3,8 @@ package kakao_tech_bootcamp.community.common;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kakao_tech_bootcamp.community.common.exceptions.UnauthorizedException;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthJwtService;
 import kakao_tech_bootcamp.community.service.AuthSessionService;
@@ -43,7 +44,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         AuthInfo authInfo = extractCredential(request, "sid")
                 .map(authSessionService::validate)
                 .or(() -> extractCredential(request, "accessToken").map(authJwtService::validate))
-                .orElseThrow(() -> new UnauthorizedException("회원만 접근 가능한 서비스입니다"));
+                .orElseThrow(() -> new CustomException(MemberExceptionCode.UNAUTHORIZED));
         request.setAttribute("LOGIN_MEMBER", authInfo);
 
         return true;
