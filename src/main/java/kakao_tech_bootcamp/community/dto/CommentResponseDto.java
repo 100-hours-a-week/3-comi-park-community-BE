@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.dto;
 
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.entity.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class CommentResponseDto {
+public class CommentResponseDto implements BaseResponse {
     private Integer id;
     private MemberResponseDto member;
     private String content;

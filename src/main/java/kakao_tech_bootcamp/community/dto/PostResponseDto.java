@@ -1,5 +1,6 @@
 package kakao_tech_bootcamp.community.dto;
 
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.entity.Post;
 import kakao_tech_bootcamp.community.entity.PostStat;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class PostResponseDto {
+public class PostResponseDto implements BaseResponse {
     private Integer id;
     private String title;
     private String content;

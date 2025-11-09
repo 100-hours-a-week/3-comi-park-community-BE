@@ -1,11 +1,12 @@
 package kakao_tech_bootcamp.community.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.entity.Member;
 import lombok.Getter;
 
 @Getter
-public class MemberReferenceDto {
+public class MemberReferenceDto implements BaseResponse {
     private Integer id;
     private String nickname;
     private ImageResponseDto image;

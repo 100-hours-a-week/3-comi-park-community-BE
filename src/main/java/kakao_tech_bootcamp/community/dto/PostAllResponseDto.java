@@ -1,12 +1,13 @@
 package kakao_tech_bootcamp.community.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class PostAllResponseDto {
+public class PostAllResponseDto implements BaseResponse {
     private Integer id;
     private String title;
     private LocalDateTime createdAt;

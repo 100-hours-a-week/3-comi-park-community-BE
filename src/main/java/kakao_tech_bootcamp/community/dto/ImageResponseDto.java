@@ -2,13 +2,14 @@ package kakao_tech_bootcamp.community.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import kakao_tech_bootcamp.community.common.StorageProperties;
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ImageResponseDto {
+public class ImageResponseDto implements BaseResponse {
     private Integer id;
     private String url;
     private String objectKey;
