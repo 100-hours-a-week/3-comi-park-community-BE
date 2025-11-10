@@ -1,7 +1,12 @@
 package kakao_tech_bootcamp.community.controller;
 
 import kakao_tech_bootcamp.community.common.ApiResponse;
+import kakao_tech_bootcamp.community.common.CookieManager;
 import kakao_tech_bootcamp.community.common.annotation.CurrentMember;
+import kakao_tech_bootcamp.community.common.jwt.JwtProperties;
+import kakao_tech_bootcamp.community.common.response.CommonResponse;
+import kakao_tech_bootcamp.community.common.response.ResponseFactory;
+import kakao_tech_bootcamp.community.common.session.SessionProperties;
 import kakao_tech_bootcamp.community.dto.*;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.MemberService;
@@ -12,26 +17,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
-
-import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
 @RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberController {
+    private final SessionProperties sessionProperties;
+    private final JwtProperties jwtProperties;
     private final MemberService memberService;
+    private final CookieManager cookieManager;
 
     @PostMapping("/availability/email")
-    public ResponseEntity<ApiResponse<Void>> isAvailableEmail(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
+    public ResponseEntity<?> isAvailableEmail(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
         memberService.existsByEmail(memberAvailabilityDto);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
+        return ResponseFactory.ok();
     }
 
     @PostMapping("/availability/nickname")
-    public ResponseEntity<ApiResponse<Void>> isAvailableNickname(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
+    public ResponseEntity<?> isAvailableNickname(@RequestBody @Validated MemberAvailabilityDto memberAvailabilityDto) {
         memberService.existsByNickname(memberAvailabilityDto);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
+        return ResponseFactory.ok();
     }
 
     @PostMapping
@@ -41,9 +48,9 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<ApiResponse<Map<String, MemberResponseDto>>> findMember(@PathVariable Integer memberId) {
+    public ResponseEntity<?> findMember(@PathVariable Integer memberId) {
         MemberResponseDto member = memberService.findMember(memberId);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("member", member)));
+        return ResponseFactory.ok(member);
     }
 
     @PatchMapping("/{memberId}")
@@ -55,33 +62,15 @@ public class MemberController {
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<ApiResponse<Void>> removeMember(@CookieValue(value = "sid", required = false) String sessionId,
+    public ResponseEntity<CommonResponse<Void>> removeMember(@CookieValue(value = "sid", required = false) String sessionId,
                                                           @CookieValue(value = "accessToken", required = false) String accessToken,
                                                           @CurrentMember AuthInfo authInfo,
                                                           @PathVariable Integer memberId) {
         memberService.removeMember(authInfo.getId(), memberId);
 
+        ResponseCookie sidCookie =  cookieManager.destroyCookie(sessionProperties.getSessionId().getKey(), sessionProperties.getSessionId().getPath());
+        ResponseCookie accessTokenCookie = cookieManager.destroyCookie(jwtProperties.getAccessToken().getKey(), jwtProperties.getAccessToken().getPath());
 
-        ResponseCookie sidCookie = ResponseCookie.from("sid", sessionId)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(0) // 일주일
-                .build();
-
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .path("/")
-                .maxAge(0) // 일주일
-                .build();
-
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .header(SET_COOKIE, sidCookie.toString())
-                .header(SET_COOKIE, accessTokenCookie.toString())
-                .body(ApiResponse.success());
+        return ResponseFactory.ok(List.of(sidCookie, accessTokenCookie));
     }
 }

@@ -2,10 +2,13 @@ package kakao_tech_bootcamp.community.common.response;
 
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 public class ResponseFactory {
     public static ResponseEntity<CommonResponse<Void>> ok() {
@@ -16,8 +19,20 @@ public class ResponseFactory {
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.succeed(wrapWithKey(dto)));
     }
 
+    public static ResponseEntity<CommonResponse<Void>> ok(List<ResponseCookie> cookies) {
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.OK);
+        cookies.forEach(cookie -> builder.header(SET_COOKIE, cookie.toString()));
+        return builder.body(CommonResponse.succeed());
+    }
+
     public static ResponseEntity<CommonResponse<Map<String,BaseResponse>>> created(BaseResponse dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.succeed(wrapWithKey(dto)));
+    }
+
+    public static ResponseEntity<CommonResponse<Void>> created(List<ResponseCookie> cookies) {
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.OK);
+        cookies.forEach(cookie -> builder.header(SET_COOKIE, cookie.toString()));
+        return builder.body(CommonResponse.succeed());
     }
 
     public static ResponseEntity<CommonResponse<Map<String,BaseResponse>>> updated(BaseResponse dto) {
