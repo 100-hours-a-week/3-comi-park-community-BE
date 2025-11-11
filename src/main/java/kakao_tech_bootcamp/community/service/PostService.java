@@ -54,9 +54,13 @@ public class PostService {
      * @return
      */
     @Transactional(readOnly = true)
-    public PostResponseDto findPost(Integer currentMemberId, Integer postId) {
+    public PostResponseDto findPost(Integer currentMemberId, Integer postId, boolean editMode) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
+
+        if (editMode) {
+            return PostResponseDto.of(post);
+        }
 
         boolean isLiked = memberPostLikeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 

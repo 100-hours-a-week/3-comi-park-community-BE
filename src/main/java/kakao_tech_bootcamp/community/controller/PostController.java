@@ -33,32 +33,38 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<BaseResponse>> findPosts(@CurrentMember AuthInfo authInfo,
-                                                                                        @RequestParam(value = "lastPostId", required = false) Integer lastPostId,
-                                                                                        @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
+    public ResponseEntity<CommonResponse<BaseResponse>> findPosts(
+            @CurrentMember AuthInfo authInfo,
+            @RequestParam(value = "lastPostId", required = false) Integer lastPostId,
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
         PostsResponseDto postsResponseDto = postService.findPosts(authInfo.getId(), lastPostId, limit);
         return ResponseFactory.ok(postsResponseDto);
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<CommonResponse<BaseResponse>> findPost(@CurrentMember AuthInfo authInfo, @PathVariable Integer postId) {
-        PostResponseDto postResponseDto = postService.findPost(authInfo.getId(), postId);
+    public ResponseEntity<CommonResponse<BaseResponse>> findPost(
+            @CurrentMember AuthInfo authInfo,
+            @PathVariable Integer postId,
+            @RequestParam(value = "editMode", defaultValue = "false") boolean editMode) {
+        PostResponseDto postResponseDto = postService.findPost(authInfo.getId(), postId, editMode);
         return ResponseFactory.ok(postResponseDto);
     }
 
     @PatchMapping("/{postId}")
-    public ResponseEntity<CommonResponse<BaseResponse>> modifyPost(@CurrentMember AuthInfo authInfo,
-                                                  @PathVariable Integer postId,
-                                                  @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
+    public ResponseEntity<CommonResponse<BaseResponse>> modifyPost(
+            @CurrentMember AuthInfo authInfo,
+            @PathVariable Integer postId,
+            @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
         PostDto changes = postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
         return ResponseFactory.ok(changes);
     }
 
     @DeleteMapping
-    public ResponseEntity<CommonResponse<BaseResponse>> removePosts(@CurrentMember AuthInfo authInfo,
-                                      @RequestParam(value = "before", required = false) LocalDate before,
-                                      @RequestParam(value = "after", required = false) LocalDate after,
-                                      @RequestParam(value = "writer", required = false) Integer memberId) {
+    public ResponseEntity<CommonResponse<BaseResponse>> removePosts(
+            @CurrentMember AuthInfo authInfo,
+            @RequestParam(value = "before", required = false) LocalDate before,
+            @RequestParam(value = "after", required = false) LocalDate after,
+            @RequestParam(value = "writer", required = false) Integer memberId) {
         // TODO: 회원 권한 확인 필요
         CountDto countDto = postService.removePosts(before, after, memberId);
         return ResponseFactory.ok(countDto);
