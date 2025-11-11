@@ -12,8 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 public class CommentsResponseDto implements BaseResponse {
     private List<CommentDto> comments;
+    private boolean hasNext;
 
-    public static CommentsResponseDto of(List<Comment> comments) {
-        return new CommentsResponseDto(comments.stream().map(CommentDto::of).toList());
+    public static CommentsResponseDto of(List<Comment> comments, boolean hasNext) {
+        return new CommentsResponseDto(comments.stream().map(CommentDto::of).toList(), hasNext);
     }
 }

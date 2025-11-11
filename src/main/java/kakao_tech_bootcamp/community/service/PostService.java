@@ -70,7 +70,13 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostsResponseDto findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
         List<PostAllResponseDto> posts = postRepository.findAllIdLessThanCustom(currentMemberId, lastPostId, limit);
-        return PostsResponseDto.of(posts);
+        boolean hasNext = posts.size() > limit;
+
+        if (hasNext) {
+            posts = posts.subList(0, limit);
+        }
+
+        return PostsResponseDto.of(posts, hasNext);
     }
 
     public PostDto modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {

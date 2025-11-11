@@ -61,7 +61,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .where(post.isDeleted.eq(false)
                         .and(lastPostId == null ? null : post.id.lt(lastPostId)))
                 .orderBy(post.id.desc())
-                .limit(limit);
+                .limit(limit + 1);
 
         return query.fetch();
     }

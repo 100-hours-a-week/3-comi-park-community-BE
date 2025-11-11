@@ -10,8 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 public class PostsResponseDto implements BaseResponse {
     private List<PostAllResponseDto> posts;
+    private boolean hasNext;
 
-    public static PostsResponseDto of(List<PostAllResponseDto> posts) {
-        return new PostsResponseDto(posts);
+    public static PostsResponseDto of(List<PostAllResponseDto> posts, boolean hasNext) {
+        return new PostsResponseDto(posts, hasNext);
     }
 }

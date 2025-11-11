@@ -50,12 +50,18 @@ public class CommentService {
     public CommentsResponseDto findComments(Integer postId, Integer lastCommentId, Integer limit) {
         postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(0, limit);
+        Pageable pageable = PageRequest.of(0, limit + 1);
         List<Comment> comments = lastCommentId == null
                 ? commentRepository.findByPostIdOrderByIdDesc(postId, pageable)
                 : commentRepository.findByPostIdAndIdLessThanOrderByIdDesc(postId, lastCommentId, pageable);
 
-        return CommentsResponseDto.of(comments);
+        boolean hasNext = comments.size() > limit;
+        
+        if (hasNext) {
+            comments = comments.subList(0, limit);
+        }
+
+        return CommentsResponseDto.of(comments, hasNext);
     }
 
     public CommentDto modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
