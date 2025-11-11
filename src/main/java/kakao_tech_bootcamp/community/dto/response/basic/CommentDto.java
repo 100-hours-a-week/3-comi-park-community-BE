@@ -1,22 +1,26 @@
-package kakao_tech_bootcamp.community.dto;
+package kakao_tech_bootcamp.community.dto.response.basic;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.entity.Comment;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Builder
 @AllArgsConstructor
-public class CommentResponseDto implements BaseResponse {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class CommentDto implements BaseResponse {
     private Integer id;
-    private MemberResponseDto member;
+    private MemberDto member;
     private String content;
     private LocalDateTime createdAt;
 
-    public static CommentResponseDto of(Comment comment) {
-        return new CommentResponseDto(comment.getId(), MemberResponseDto.of(comment.getMember()),
+    public static CommentDto of(Comment comment) {
+        return new CommentDto(comment.getId(), MemberDto.of(comment.getMember()),
                 comment.getContent(), comment.getCreatedAt());
     }
 }

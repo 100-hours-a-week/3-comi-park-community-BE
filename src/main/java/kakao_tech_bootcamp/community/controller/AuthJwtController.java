@@ -5,7 +5,7 @@ import kakao_tech_bootcamp.community.common.CookieManager;
 import kakao_tech_bootcamp.community.common.jwt.JwtProperties;
 import kakao_tech_bootcamp.community.common.response.CommonResponse;
 import kakao_tech_bootcamp.community.common.response.ResponseFactory;
-import kakao_tech_bootcamp.community.dto.AuthRequestDto;
+import kakao_tech_bootcamp.community.dto.request.AuthRequestDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthJwtService;
 import lombok.RequiredArgsConstructor;

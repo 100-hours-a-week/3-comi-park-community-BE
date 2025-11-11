@@ -3,7 +3,7 @@ package kakao_tech_bootcamp.community.service;
 import kakao_tech_bootcamp.community.common.StorageProperties;
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.ImageExceptionCode;
-import kakao_tech_bootcamp.community.dto.ImageResponseDto;
+import kakao_tech_bootcamp.community.dto.response.ImageResponseDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.repository.ImageRepository;

@@ -1,6 +1,6 @@
 package kakao_tech_bootcamp.community.repository;
 
-import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
+import kakao_tech_bootcamp.community.dto.response.PostAllResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

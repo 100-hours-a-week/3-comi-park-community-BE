@@ -1,7 +1,8 @@
-package kakao_tech_bootcamp.community.dto;
+package kakao_tech_bootcamp.community.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 import kakao_tech_bootcamp.community.common.response.BaseResponse;
+import kakao_tech_bootcamp.community.dto.response.basic.ImageDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import lombok.Getter;
 
@@ -9,10 +10,10 @@ import lombok.Getter;
 public class MemberReferenceDto implements BaseResponse {
     private Integer id;
     private String nickname;
-    private ImageResponseDto image;
+    private ImageDto image;
 
     @QueryProjection
-    public MemberReferenceDto(Integer id, String nickname, ImageResponseDto image) {
+    public MemberReferenceDto(Integer id, String nickname, ImageDto image) {
         this.id = id;
         this.nickname = nickname;
         /*
@@ -24,6 +25,6 @@ public class MemberReferenceDto implements BaseResponse {
     }
 
     public static MemberReferenceDto of(Member member) {
-        return new MemberReferenceDto(member.getId(), member.getNickname(), ImageResponseDto.of(member.getImage()));
+        return new MemberReferenceDto(member.getId(), member.getNickname(), ImageDto.of(member.getImage()));
     }
 }

@@ -1,4 +1,4 @@
-package kakao_tech_bootcamp.community.dto;
+package kakao_tech_bootcamp.community.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
 import kakao_tech_bootcamp.community.common.response.BaseResponse;

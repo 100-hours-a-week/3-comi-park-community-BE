@@ -3,10 +3,14 @@ package kakao_tech_bootcamp.community.service;
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.common.exceptions.code.PostExceptionCode;
-import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
-import kakao_tech_bootcamp.community.dto.PostCreateRequestDto;
-import kakao_tech_bootcamp.community.dto.PostResponseDto;
-import kakao_tech_bootcamp.community.dto.PostUpdateRequestDto;
+import kakao_tech_bootcamp.community.dto.response.PostAllResponseDto;
+import kakao_tech_bootcamp.community.dto.request.PostCreateRequestDto;
+import kakao_tech_bootcamp.community.dto.response.PostsResponseDto;
+import kakao_tech_bootcamp.community.dto.response.basic.CountDto;
+import kakao_tech_bootcamp.community.dto.response.basic.ImageDto;
+import kakao_tech_bootcamp.community.dto.response.basic.PostDto;
+import kakao_tech_bootcamp.community.dto.request.PostUpdateRequestDto;
+import kakao_tech_bootcamp.community.dto.response.PostResponseDto;
 import kakao_tech_bootcamp.community.entity.*;
 import kakao_tech_bootcamp.community.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -66,33 +68,33 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostAllResponseDto> findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
-        return postRepository.findAllIdLessThanCustom(currentMemberId, lastPostId, limit);
+    public PostsResponseDto findPosts(Integer currentMemberId, Integer lastPostId, Integer limit) {
+        List<PostAllResponseDto> posts = postRepository.findAllIdLessThanCustom(currentMemberId, lastPostId, limit);
+        return PostsResponseDto.of(posts);
     }
 
-    public Map<String, Object> modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
+    public PostDto modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
         if (!Objects.equals(post.getMember().getId(), currentMemberId)) {
             throw new CustomException(PostExceptionCode.FORBIDDEN_UPDATE);
         }
 
-        Map<String, Object> changes = new HashMap<>();
+        PostDto.PostDtoBuilder builder = PostDto.builder();
 
         if (dto.getPostDeleted()) {
-            post.markDeleted(); // 관련 이미지 상태는 여전히 ACTIVE (배치 프로그램에 의해 삭제되지 않도록)
-            changes.put("postDeleted", true);
-            return changes; // soft delete 요청 시 그 외 게시글 수정 무시
+            post.markDeleted(); // 관련 이미지 상태는 여전히 ACTIVE (배치 프로그램에 의해 삭제되지 않기 위함)
+            return builder.postDeleted(true).build(); // soft delete 요청 시 그 외 게시글 수정 무시
         }
 
         if (dto.getTitle() != null) {
             post.changeTitle(dto.getTitle());
-            changes.put("title", post.getTitle());
+            builder.title(post.getTitle());
         }
 
         if (dto.getContent() != null) {
             post.changeContent(dto.getContent());
-            changes.put("content", post.getContent());
+            builder.content(post.getContent());
         }
 
         /*
@@ -104,7 +106,7 @@ public class PostService {
             post.changeImage(null);
             imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
 
-            changes.put("image", post.getImage());
+            builder.image(ImageDto.of(post.getImage()));
         }
 
         if (dto.getImage() != null) {
@@ -117,21 +119,23 @@ public class PostService {
                 imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
             }
 
-            changes.put("image", post.getImage());
+            builder.image(ImageDto.of(post.getImage()));
         }
 
-        return changes;
+        return builder.build();
     }
 
-    public long removePosts(LocalDate before, LocalDate after, Integer memberId) {
+    public CountDto removePosts(LocalDate before, LocalDate after, Integer memberId) {
         if (before == null && after == null && memberId == null) {
-            return 0; // 쿼리스트링 없으면 아무 작업 X
+            // 쿼리스트링 없으면 아무 작업 X
+            return CountDto.of(0);
         }
 
         // LocalDateTime createdAt과 비교하기 위해 레포지터리가 아닌 서비스 계층에서 미리 변환
         LocalDateTime convertedBefore = before != null ? before.plusDays(1).atStartOfDay() : null;
         LocalDateTime convertedAfter = after != null ? after.atStartOfDay() : null;
 
-        return postRepository.deleteAllByIsDeletedTrueAndDynamicFilters(memberId, convertedBefore, convertedAfter);
+        long affectedRows = postRepository.deleteAllByIsDeletedTrueAndDynamicFilters(memberId, convertedBefore, convertedAfter);
+        return CountDto.of((int) affectedRows);
     }
 }

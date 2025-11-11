@@ -4,7 +4,7 @@ import kakao_tech_bootcamp.community.auth.Session;
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.AuthExceptionCode;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
-import kakao_tech_bootcamp.community.dto.AuthRequestDto;
+import kakao_tech_bootcamp.community.dto.request.AuthRequestDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.SessionRepository;
 import kakao_tech_bootcamp.community.repository.MemberRepository;

@@ -2,7 +2,12 @@ package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
-import kakao_tech_bootcamp.community.dto.*;
+import kakao_tech_bootcamp.community.dto.request.MemberAvailabilityDto;
+import kakao_tech_bootcamp.community.dto.request.MemberCreateRequestDto;
+import kakao_tech_bootcamp.community.dto.request.MemberUpdateRequestDto;
+import kakao_tech_bootcamp.community.dto.response.MemberResponseDto;
+import kakao_tech_bootcamp.community.dto.response.basic.ImageDto;
+import kakao_tech_bootcamp.community.dto.response.basic.MemberDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.entity.Member;
@@ -12,8 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -67,7 +70,7 @@ public class MemberService {
         return MemberResponseDto.of(member);
     }
 
-    public Map<String, Object> modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
+    public MemberDto modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
         if (!Objects.equals(currentMemberId, id)) {
             throw new CustomException(MemberExceptionCode.FORBIDDEN_UPDATE);
         }
@@ -75,7 +78,7 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
 
-        Map<String, Object> changes = new HashMap<>();
+        MemberDto.MemberDtoBuilder builder = MemberDto.builder();
 
         if (dto.getPassword() != null) {
             if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
@@ -83,12 +86,12 @@ public class MemberService {
             }
 
             member.changePassword(passwordEncoder.encode(dto.getPassword()));
-            changes.put("passwordChanged", true);
+            builder.passwordChanged(true);
         }
 
         if (dto.getNickname() != null) {
             member.changeNickname(dto.getNickname());
-            changes.put("nickname", member.getNickname());
+            builder.nickname(member.getNickname());
         }
 
         /*
@@ -101,7 +104,7 @@ public class MemberService {
             member.changeImage(null);
             imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
 
-            changes.put("image", member.getImage());
+            builder.image(ImageDto.of(member.getImage()));
         }
 
         if (dto.getImage() != null) {
@@ -119,10 +122,10 @@ public class MemberService {
                 imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
             }
 
-            changes.put("image", ImageResponseDto.of(member.getImage()));
+            builder.image(ImageDto.of(member.getImage()));
         }
 
-        return changes;
+        return builder.build();
     }
 
     public void removeMember(Integer currentMemberId, Integer id) {
