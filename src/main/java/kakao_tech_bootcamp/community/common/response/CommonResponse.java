@@ -21,7 +21,7 @@ public class CommonResponse<T> {
         return new CommonResponse<>(true, null, data);
     }
 
-    public static CommonResponse<List<String >> fail(List<String> data) {
+    public static CommonResponse<List<String>> fail(List<String> data) {
         return new CommonResponse<>(false, null, data);
     }
 
