@@ -18,7 +18,7 @@ public class MemberDto implements BaseResponse {
     private ImageDto image;
     private LocalDateTime createdAt;
 
-    private boolean passwordChanged;
+    private Boolean passwordChanged;
 
     public static MemberDto of(Member member) {
         return MemberDto.builder()

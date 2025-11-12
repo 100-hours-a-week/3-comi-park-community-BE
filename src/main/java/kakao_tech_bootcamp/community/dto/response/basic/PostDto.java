@@ -20,7 +20,7 @@ public class PostDto implements BaseResponse {
     private ImageDto image;
     private LocalDateTime createdAt;
 
-    private boolean postDeleted;
+    private Boolean postDeleted;
 
     public static PostDto of(Post post) {
         return PostDto.builder()
