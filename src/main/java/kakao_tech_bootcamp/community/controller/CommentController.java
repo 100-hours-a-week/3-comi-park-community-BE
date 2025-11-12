@@ -5,9 +5,9 @@ import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.common.response.CommonResponse;
 import kakao_tech_bootcamp.community.common.response.ResponseFactory;
 import kakao_tech_bootcamp.community.dto.request.CommentRequestDto;
+import kakao_tech_bootcamp.community.dto.response.ChangedResponseDto;
 import kakao_tech_bootcamp.community.dto.response.CommentResponseDto;
 import kakao_tech_bootcamp.community.dto.response.CommentsResponseDto;
-import kakao_tech_bootcamp.community.dto.response.basic.CommentDto;
 import kakao_tech_bootcamp.community.dto.response.basic.CountDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.CommentService;
@@ -45,7 +45,7 @@ public class CommentController {
                                                      @PathVariable("postId") Integer postId,
                                                      @PathVariable("commentId") Integer commentId,
                                                      @RequestBody @Validated CommentRequestDto commentRequestDto) {
-        CommentDto changes = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
+        ChangedResponseDto changes = commentService.modifyComment(authInfo.getId(), postId, commentId, commentRequestDto);
         return ResponseFactory.ok(changes);
     }
 

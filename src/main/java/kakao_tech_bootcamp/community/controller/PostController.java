@@ -5,9 +5,9 @@ import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.common.response.CommonResponse;
 import kakao_tech_bootcamp.community.common.response.ResponseFactory;
 import kakao_tech_bootcamp.community.dto.request.PostCreateRequestDto;
+import kakao_tech_bootcamp.community.dto.response.ChangedResponseDto;
 import kakao_tech_bootcamp.community.dto.response.PostsResponseDto;
 import kakao_tech_bootcamp.community.dto.response.basic.CountDto;
-import kakao_tech_bootcamp.community.dto.response.basic.PostDto;
 import kakao_tech_bootcamp.community.dto.request.PostUpdateRequestDto;
 import kakao_tech_bootcamp.community.dto.response.PostResponseDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
@@ -55,7 +55,7 @@ public class PostController {
             @CurrentMember AuthInfo authInfo,
             @PathVariable Integer postId,
             @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto) {
-        PostDto changes = postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
+        ChangedResponseDto changes = postService.modifyPost(authInfo.getId(), postId, postUpdateRequestDto);
         return ResponseFactory.ok(changes);
     }
 

@@ -3,12 +3,12 @@ package kakao_tech_bootcamp.community.service;
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.common.exceptions.code.PostExceptionCode;
+import kakao_tech_bootcamp.community.dto.response.ChangedResponseDto;
 import kakao_tech_bootcamp.community.dto.response.PostAllResponseDto;
 import kakao_tech_bootcamp.community.dto.request.PostCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.response.PostsResponseDto;
 import kakao_tech_bootcamp.community.dto.response.basic.CountDto;
 import kakao_tech_bootcamp.community.dto.response.basic.ImageDto;
-import kakao_tech_bootcamp.community.dto.response.basic.PostDto;
 import kakao_tech_bootcamp.community.dto.request.PostUpdateRequestDto;
 import kakao_tech_bootcamp.community.dto.response.PostResponseDto;
 import kakao_tech_bootcamp.community.entity.*;
@@ -83,28 +83,28 @@ public class PostService {
         return PostsResponseDto.of(posts, hasNext);
     }
 
-    public PostDto modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
+    public ChangedResponseDto modifyPost(Integer currentMemberId, Integer postId, PostUpdateRequestDto dto) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
         if (!Objects.equals(post.getMember().getId(), currentMemberId)) {
             throw new CustomException(PostExceptionCode.FORBIDDEN_UPDATE);
         }
 
-        PostDto.PostDtoBuilder builder = PostDto.builder();
+        ChangedResponseDto changedResponseDto = new ChangedResponseDto();
 
         if (dto.getPostDeleted()) {
             post.markDeleted(); // 관련 이미지 상태는 여전히 ACTIVE (배치 프로그램에 의해 삭제되지 않기 위함)
-            return builder.postDeleted(true).build(); // soft delete 요청 시 그 외 게시글 수정 무시
+            changedResponseDto.add("postDeleted", true); // soft delete 요청 시 그 외 게시글 수정 무시
         }
 
         if (dto.getTitle() != null) {
             post.changeTitle(dto.getTitle());
-            builder.title(post.getTitle());
+            changedResponseDto.add("title", post.getTitle());
         }
 
         if (dto.getContent() != null) {
             post.changeContent(dto.getContent());
-            builder.content(post.getContent());
+            changedResponseDto.add("content", post.getContent());
         }
 
         /*
@@ -116,7 +116,7 @@ public class PostService {
             post.changeImage(null);
             imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
 
-            builder.image(ImageDto.of(post.getImage()));
+            changedResponseDto.add("image", ImageDto.of(post.getImage()));
         }
 
         if (dto.getImage() != null) {
@@ -129,10 +129,10 @@ public class PostService {
                 imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
             }
 
-            builder.image(ImageDto.of(post.getImage()));
+            changedResponseDto.add("image", ImageDto.of(post.getImage()));
         }
 
-        return builder.build();
+        return changedResponseDto;
     }
 
     public CountDto removePosts(LocalDate before, LocalDate after, Integer memberId) {

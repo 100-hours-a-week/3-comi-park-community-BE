@@ -5,9 +5,9 @@ import kakao_tech_bootcamp.community.common.exceptions.code.CommentExceptionCode
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.common.exceptions.code.PostExceptionCode;
 import kakao_tech_bootcamp.community.dto.request.CommentRequestDto;
+import kakao_tech_bootcamp.community.dto.response.ChangedResponseDto;
 import kakao_tech_bootcamp.community.dto.response.CommentResponseDto;
 import kakao_tech_bootcamp.community.dto.response.CommentsResponseDto;
-import kakao_tech_bootcamp.community.dto.response.basic.CommentDto;
 import kakao_tech_bootcamp.community.dto.response.basic.CountDto;
 import kakao_tech_bootcamp.community.entity.Comment;
 import kakao_tech_bootcamp.community.entity.Member;
@@ -64,7 +64,7 @@ public class CommentService {
         return CommentsResponseDto.of(comments, hasNext);
     }
 
-    public CommentDto modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
+    public ChangedResponseDto modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
         postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(CommentExceptionCode.NOT_FOUND));
 
@@ -72,9 +72,12 @@ public class CommentService {
             throw new CustomException(CommentExceptionCode.FORBIDDEN_UPDATE);
         }
 
+        ChangedResponseDto changedResponseDto = new ChangedResponseDto();
         comment.changeContent(dto.getContent());
 
-        return CommentDto.builder().content(comment.getContent()).build();
+        changedResponseDto.add("content", dto.getContent());
+
+        return changedResponseDto;
     }
 
     public CountDto removeComment(Integer currentMemberId, Integer postId, Integer commentId) {

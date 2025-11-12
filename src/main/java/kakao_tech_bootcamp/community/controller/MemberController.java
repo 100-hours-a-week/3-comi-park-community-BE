@@ -10,8 +10,8 @@ import kakao_tech_bootcamp.community.common.session.SessionProperties;
 import kakao_tech_bootcamp.community.dto.request.MemberAvailabilityDto;
 import kakao_tech_bootcamp.community.dto.request.MemberCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.request.MemberUpdateRequestDto;
+import kakao_tech_bootcamp.community.dto.response.ChangedResponseDto;
 import kakao_tech_bootcamp.community.dto.response.MemberResponseDto;
-import kakao_tech_bootcamp.community.dto.response.basic.MemberDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +59,7 @@ public class MemberController {
     public ResponseEntity<CommonResponse<BaseResponse>> modifyMember(@CurrentMember AuthInfo authInfo,
                                        @PathVariable Integer memberId,
                                        @RequestBody @Validated MemberUpdateRequestDto updateMemberRequestDto) {
-        MemberDto changes = memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
+        ChangedResponseDto changes = memberService.modifyMember(authInfo.getId(), memberId, updateMemberRequestDto);
         return ResponseFactory.ok(changes);
     }
 

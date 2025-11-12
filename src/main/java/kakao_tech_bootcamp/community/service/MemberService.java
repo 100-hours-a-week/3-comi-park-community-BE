@@ -5,9 +5,9 @@ import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.dto.request.MemberAvailabilityDto;
 import kakao_tech_bootcamp.community.dto.request.MemberCreateRequestDto;
 import kakao_tech_bootcamp.community.dto.request.MemberUpdateRequestDto;
+import kakao_tech_bootcamp.community.dto.response.ChangedResponseDto;
 import kakao_tech_bootcamp.community.dto.response.MemberResponseDto;
 import kakao_tech_bootcamp.community.dto.response.basic.ImageDto;
-import kakao_tech_bootcamp.community.dto.response.basic.MemberDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.entity.Member;
@@ -70,7 +70,7 @@ public class MemberService {
         return MemberResponseDto.of(member);
     }
 
-    public MemberDto modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
+    public ChangedResponseDto modifyMember(Integer currentMemberId, Integer id, MemberUpdateRequestDto dto) {
         if (!Objects.equals(currentMemberId, id)) {
             throw new CustomException(MemberExceptionCode.FORBIDDEN_UPDATE);
         }
@@ -78,7 +78,7 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
 
-        MemberDto.MemberDtoBuilder builder = MemberDto.builder();
+        ChangedResponseDto changedResponseDto = new ChangedResponseDto();
 
         if (dto.getPassword() != null) {
             if (!dto.getPassword().equals(dto.getConfirmedPassword())) {
@@ -86,12 +86,12 @@ public class MemberService {
             }
 
             member.changePassword(passwordEncoder.encode(dto.getPassword()));
-            builder.passwordChanged(true);
+            changedResponseDto.add("passwordChanged", true);
         }
 
         if (dto.getNickname() != null) {
             member.changeNickname(dto.getNickname());
-            builder.nickname(member.getNickname());
+            changedResponseDto.add("nickname", member.getNickname());
         }
 
         /*
@@ -104,7 +104,7 @@ public class MemberService {
             member.changeImage(null);
             imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
 
-            builder.image(ImageDto.of(member.getImage()));
+            changedResponseDto.add("image", ImageDto.of(member.getImage()));
         }
 
         if (dto.getImage() != null) {
@@ -122,10 +122,10 @@ public class MemberService {
                 imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
             }
 
-            builder.image(ImageDto.of(member.getImage()));
+            changedResponseDto.add("image", ImageDto.of(member.getImage()));
         }
 
-        return builder.build();
+        return changedResponseDto;
     }
 
     public void removeMember(Integer currentMemberId, Integer id) {
