@@ -8,6 +8,7 @@ import kakao_tech_bootcamp.community.common.exceptions.code.AuthExceptionCode;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.common.jwt.JwtProvider;
 import kakao_tech_bootcamp.community.dto.request.AuthRequestDto;
+import kakao_tech_bootcamp.community.dto.response.AuthResponseDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,14 +40,14 @@ public class AuthJwtService {
                 "refreshToken", jwtProvider.issueRefreshToken(member.getId(), member.getEmail()));
     }
 
-    public AuthInfo validate(String accessToken) {
+    public AuthResponseDto validate(String accessToken) {
         if (accessToken == null) {
             throw new CustomException(AuthExceptionCode.MISSING_AUTH);
         }
 
         try {
             Claims body = jwtProvider.parse(accessToken).getBody();
-            return new AuthInfo((Integer) body.get("id"));
+            return AuthResponseDto.of(new AuthInfo((Integer) body.get("id")));
         } catch (ExpiredJwtException e) {
             throw new CustomException(AuthExceptionCode.EXPIRED_AUTH);
         } catch (SignatureException e) {

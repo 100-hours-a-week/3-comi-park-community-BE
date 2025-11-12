@@ -1,15 +1,14 @@
 package kakao_tech_bootcamp.community.controller;
 
-import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.CookieManager;
 import kakao_tech_bootcamp.community.common.jwt.JwtProperties;
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.common.response.CommonResponse;
 import kakao_tech_bootcamp.community.common.response.ResponseFactory;
 import kakao_tech_bootcamp.community.dto.request.AuthRequestDto;
-import kakao_tech_bootcamp.community.service.AuthInfo;
+import kakao_tech_bootcamp.community.dto.response.AuthResponseDto;
 import kakao_tech_bootcamp.community.service.AuthJwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -56,9 +55,9 @@ public class AuthJwtController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue(value = "accessToken", required = false) String accessToken) {
-        AuthInfo session = authJwtService.validate(accessToken);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
+    public ResponseEntity<CommonResponse<BaseResponse>> validate(@CookieValue(value = "accessToken", required = false) String accessToken) {
+        AuthResponseDto session = authJwtService.validate(accessToken);
+        return ResponseFactory.ok(session);
     }
 
     @PostMapping("/refresh")

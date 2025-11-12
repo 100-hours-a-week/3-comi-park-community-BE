@@ -1,16 +1,15 @@
 package kakao_tech_bootcamp.community.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import kakao_tech_bootcamp.community.common.ApiResponse;
 import kakao_tech_bootcamp.community.common.CookieManager;
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
 import kakao_tech_bootcamp.community.common.response.CommonResponse;
 import kakao_tech_bootcamp.community.common.response.ResponseFactory;
 import kakao_tech_bootcamp.community.common.session.SessionProperties;
 import kakao_tech_bootcamp.community.dto.request.AuthRequestDto;
-import kakao_tech_bootcamp.community.service.AuthInfo;
+import kakao_tech_bootcamp.community.dto.response.AuthResponseDto;
 import kakao_tech_bootcamp.community.service.AuthSessionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -66,9 +65,9 @@ public class AuthSessionController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Map<String, AuthInfo>>> validate(@CookieValue("sid") String sessionId) {
-        AuthInfo session = authSessionService.validate(sessionId);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(Map.of("auth", session)));
+    public ResponseEntity<CommonResponse<BaseResponse>> validate(@CookieValue("sid") String sessionId) {
+        AuthResponseDto session = authSessionService.validate(sessionId);
+        return ResponseFactory.ok(session);
     }
 
     @PostMapping("/refresh")

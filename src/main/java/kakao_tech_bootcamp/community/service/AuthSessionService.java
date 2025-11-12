@@ -5,6 +5,7 @@ import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.AuthExceptionCode;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
 import kakao_tech_bootcamp.community.dto.request.AuthRequestDto;
+import kakao_tech_bootcamp.community.dto.response.AuthResponseDto;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.repository.SessionRepository;
 import kakao_tech_bootcamp.community.repository.MemberRepository;
@@ -59,7 +60,7 @@ public class AuthSessionService {
         return Map.of("sid", sessionId, "rid", refreshId);
     }
 
-    public AuthInfo validate(String credential) {
+    public AuthResponseDto validate(String credential) {
         Session session = sessionRepository.findById(credential)
                 .orElseThrow(() -> new CustomException(AuthExceptionCode.MISSING_AUTH));
 
@@ -68,7 +69,7 @@ public class AuthSessionService {
             throw new CustomException(AuthExceptionCode.EXPIRED_AUTH);
         }
 
-        return new AuthInfo(session.getMemberId());
+        return AuthResponseDto.of(new AuthInfo(session.getMemberId()));
     }
 
     public void invalidate(String credential) {

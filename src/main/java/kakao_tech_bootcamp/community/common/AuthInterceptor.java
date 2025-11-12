@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
-import kakao_tech_bootcamp.community.service.AuthInfo;
+import kakao_tech_bootcamp.community.dto.response.AuthResponseDto;
 import kakao_tech_bootcamp.community.service.AuthJwtService;
 import kakao_tech_bootcamp.community.service.AuthSessionService;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        AuthInfo authInfo = extractCredential(request, "sid")
+        AuthResponseDto authInfo = extractCredential(request, "sid")
                 .map(authSessionService::validate)
                 .or(() -> extractCredential(request, "accessToken").map(authJwtService::validate))
                 .orElseThrow(() -> new CustomException(MemberExceptionCode.UNAUTHORIZED));
