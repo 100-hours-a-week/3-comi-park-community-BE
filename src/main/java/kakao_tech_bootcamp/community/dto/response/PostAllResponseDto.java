@@ -1,16 +1,15 @@
-package kakao_tech_bootcamp.community.dto;
+package kakao_tech_bootcamp.community.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
+import kakao_tech_bootcamp.community.common.response.BaseResponse;
+import kakao_tech_bootcamp.community.dto.response.basic.PostDto;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class PostAllResponseDto {
-    private Integer id;
-    private String title;
-    private LocalDateTime createdAt;
-    private MemberReferenceDto member;
+public class PostAllResponseDto implements BaseResponse {
+    private PostDto post;
     private boolean isLiked;
     private int viewCount;
     private int likeCount;
@@ -27,10 +26,7 @@ public class PostAllResponseDto {
             Integer likeCount,
             Integer commentCount
     ) {
-        this.id = id;
-        this.title = title;
-        this.createdAt = createdAt;
-        this.member = member;
+        post = PostDto.builder().id(id).title(title).createdAt(createdAt).member(member).build();
         this.isLiked = isLiked;
         this.viewCount = viewCount;
         this.likeCount = likeCount;

@@ -1,9 +1,9 @@
 package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.common.StorageProperties;
-import kakao_tech_bootcamp.community.common.exceptions.BadRequestException;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
-import kakao_tech_bootcamp.community.dto.ImageResponseDto;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.ImageExceptionCode;
+import kakao_tech_bootcamp.community.dto.response.ImageResponseDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.repository.ImageRepository;
@@ -46,7 +46,7 @@ public class ImageService {
 
     public Image modifyImageStatusById(Integer imageId, ImageStatus imageStatus) {
         Image image = imageRepository.findById(imageId)
-                .orElseThrow(() -> new NotFoundException("이미지를 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(ImageExceptionCode.NOT_FOUND));
         image.changeStatus(imageStatus);
         // TODO: 엔티티 말고 dto를 반환할 방법?
         return image;
@@ -64,7 +64,7 @@ public class ImageService {
         Matcher matcher = Pattern.compile(REGEX).matcher(filename);
 
         if (!matcher.find()) {
-            throw new BadRequestException("이미지 파일(png, jpg, jpeg, png, webp, heic, heif)만 업로드할 수 있습니다");
+            throw new CustomException(ImageExceptionCode.UNSUPPORTED_EXTENSION);
         }
 
         String extension = matcher.group(1);
@@ -95,12 +95,12 @@ public class ImageService {
             return sb.toString();
         }
 
-        throw new BadRequestException("잘못된 요청입니다");
+        return "";
     }
 
     private void validateExtension(String extension) {
         if (!AVAILABLE_EXTENSIONS.contains(extension)) {
-            throw new BadRequestException("이미지 파일(png, jpg, jpeg, png, webp, heic, heif)만 업로드할 수 있습니다");
+            throw new CustomException(ImageExceptionCode.UNSUPPORTED_EXTENSION);
         }
     }
 }

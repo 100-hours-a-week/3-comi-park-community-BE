@@ -1,9 +1,14 @@
 package kakao_tech_bootcamp.community.service;
 
-import kakao_tech_bootcamp.community.common.exceptions.ForbiddenException;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
-import kakao_tech_bootcamp.community.dto.CommentRequestDto;
-import kakao_tech_bootcamp.community.dto.CommentResponseDto;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.CommentExceptionCode;
+import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
+import kakao_tech_bootcamp.community.common.exceptions.code.PostExceptionCode;
+import kakao_tech_bootcamp.community.dto.request.CommentRequestDto;
+import kakao_tech_bootcamp.community.dto.response.ChangedResponseDto;
+import kakao_tech_bootcamp.community.dto.response.CommentResponseDto;
+import kakao_tech_bootcamp.community.dto.response.CommentsResponseDto;
+import kakao_tech_bootcamp.community.dto.response.basic.CountDto;
 import kakao_tech_bootcamp.community.entity.Comment;
 import kakao_tech_bootcamp.community.entity.Member;
 import kakao_tech_bootcamp.community.entity.Post;
@@ -18,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -30,49 +34,58 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final PostStatService postStatService;
 
-    public Map<String, Object> saveComment(Integer currentMemberId, Integer postId, CommentRequestDto dto) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
-        Member member = memberRepository.findById(currentMemberId).orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다"));
+    public CommentResponseDto saveComment(Integer currentMemberId, Integer postId, CommentRequestDto dto) {
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
+        Member member = memberRepository.findById(currentMemberId).orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
         Comment comment = commentRepository.save(new Comment(post, member, dto.getContent()));
 
         PostStat postStat = postStatService.findPostStat(post)
                 .orElseGet(() -> postStatService.savePostStatInitializedByCount(post));
         int commentCount = postStatService.incrementCommentCount(postStat);
 
-        return Map.of("comment", CommentResponseDto.of(comment), "commentCount", commentCount);
+        return CommentResponseDto.of(commentCount, comment);
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponseDto> findComments(Integer postId, Integer lastCommentId, Integer limit) {
-        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+    public CommentsResponseDto findComments(Integer postId, Integer lastCommentId, Integer limit) {
+        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
-        Pageable pageable = PageRequest.of(0, limit);
+        Pageable pageable = PageRequest.of(0, limit + 1);
         List<Comment> comments = lastCommentId == null
                 ? commentRepository.findByPostIdOrderByIdDesc(postId, pageable)
                 : commentRepository.findByPostIdAndIdLessThanOrderByIdDesc(postId, lastCommentId, pageable);
 
-        return comments.stream().map(CommentResponseDto::of).toList();
-    }
-
-    public Map<String, Object> modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
-        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
-
-        if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
-            throw new ForbiddenException("댓글을 작성한 회원만 수정할 수 있습니다");
+        boolean hasNext = comments.size() > limit;
+        
+        if (hasNext) {
+            comments = comments.subList(0, limit);
         }
 
-        comment.changeContent(dto.getContent());
-
-        return Map.of("content", comment.getContent());
+        return CommentsResponseDto.of(comments, hasNext);
     }
 
-    public int removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다"));
+    public ChangedResponseDto modifyComment(Integer currentMemberId, Integer postId, Integer commentId, CommentRequestDto dto) {
+        postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(CommentExceptionCode.NOT_FOUND));
 
         if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
-            throw new ForbiddenException("댓글을 작성한 회원만 삭제할 수 있습니다");
+            throw new CustomException(CommentExceptionCode.FORBIDDEN_UPDATE);
+        }
+
+        ChangedResponseDto changedResponseDto = new ChangedResponseDto();
+        comment.changeContent(dto.getContent());
+
+        changedResponseDto.add("content", dto.getContent());
+
+        return changedResponseDto;
+    }
+
+    public CountDto removeComment(Integer currentMemberId, Integer postId, Integer commentId) {
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CustomException(CommentExceptionCode.NOT_FOUND));
+
+        if (!Objects.equals(comment.getMember().getId(), currentMemberId)) {
+            throw new CustomException(CommentExceptionCode.FORBIDDEN_DELETE);
         }
 
         PostStat postStat = postStatService.findPostStat(post)
@@ -81,6 +94,6 @@ public class CommentService {
 
         commentRepository.delete(comment);
 
-        return commentCount;
+        return CountDto.of(commentCount);
     }
 }

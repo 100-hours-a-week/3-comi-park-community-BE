@@ -1,7 +1,9 @@
 package kakao_tech_bootcamp.community.service;
 
-import kakao_tech_bootcamp.community.common.exceptions.ConflictException;
-import kakao_tech_bootcamp.community.common.exceptions.NotFoundException;
+import kakao_tech_bootcamp.community.common.exceptions.CustomException;
+import kakao_tech_bootcamp.community.common.exceptions.code.MemberLikeExceptionCode;
+import kakao_tech_bootcamp.community.common.exceptions.code.PostExceptionCode;
+import kakao_tech_bootcamp.community.dto.response.basic.CountDto;
 import kakao_tech_bootcamp.community.entity.MemberPostLike;
 import kakao_tech_bootcamp.community.entity.MemberPostLikeId;
 import kakao_tech_bootcamp.community.entity.Post;
@@ -19,14 +21,14 @@ public class MemberPostLikeService {
     private final PostRepository postRepository;
     private final PostStatService postStatService;
 
-    public int saveLike(Integer currentMemberId, Integer postId) {
+    public CountDto saveLike(Integer currentMemberId, Integer postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
         boolean likeExists = likeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 
         if (likeExists) {
-            throw new ConflictException("회원이 이미 좋아요한 게시글입니다");
+            throw new CustomException(MemberLikeExceptionCode.DUPLICATED_LIKE);
         }
 
         PostStat postStat = postStatService.findPostStat(post)
@@ -34,17 +36,17 @@ public class MemberPostLikeService {
         int likeCount = postStatService.incrementLikeCount(postStat);
 
         likeRepository.save(new MemberPostLike(postId, currentMemberId));
-        return likeCount;
+        return CountDto.of(likeCount);
     }
 
-    public int removeLike(Integer currentMemberId, Integer postId) {
+    public CountDto removeLike(Integer currentMemberId, Integer postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(PostExceptionCode.NOT_FOUND));
 
         boolean likeExists = likeRepository.existsByMemberPostLikeIdPostIdAndMemberPostLikeIdMemberId(postId, currentMemberId);
 
         if (!likeExists) {
-            throw new NotFoundException("좋아요를 찾을 수 없습니다");
+            throw new CustomException(MemberLikeExceptionCode.NOT_FOUND);
         }
 
         PostStat postStat = postStatService.findPostStat(post)
@@ -53,6 +55,6 @@ public class MemberPostLikeService {
 
         likeRepository.deleteById(new MemberPostLikeId(postId, currentMemberId));
 
-        return likeCount;
+        return CountDto.of(likeCount);
     }
 }

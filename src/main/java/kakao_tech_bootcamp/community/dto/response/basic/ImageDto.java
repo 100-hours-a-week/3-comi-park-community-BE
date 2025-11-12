@@ -1,4 +1,4 @@
-package kakao_tech_bootcamp.community.dto;
+package kakao_tech_bootcamp.community.dto.response.basic;
 
 import com.querydsl.core.annotations.QueryProjection;
 import kakao_tech_bootcamp.community.common.StorageProperties;
@@ -8,21 +8,21 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ImageResponseDto {
+public class ImageDto {
     private Integer id;
     private String url;
     private String objectKey;
     private String filename;
 
     @QueryProjection
-    public ImageResponseDto(Integer id, String objectKey, String filename) {
+    public ImageDto(Integer id, String objectKey, String filename) {
         this.id = id;
         this.objectKey = objectKey;
         this.filename = filename;
         this.url = StorageProperties.getStaticBaseUrl() + objectKey;
     }
 
-    public static ImageResponseDto of(Image image) {
-        return image != null ? new ImageResponseDto(image.getId(), image.getObjectKey(), image.getFilename()) : null;
+    public static ImageDto of(Image image) {
+        return image != null ? new ImageDto(image.getId(), image.getObjectKey(), image.getFilename()) : null;
     }
 }

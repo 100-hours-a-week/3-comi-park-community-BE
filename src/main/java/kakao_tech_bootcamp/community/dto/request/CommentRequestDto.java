@@ -1,4 +1,4 @@
-package kakao_tech_bootcamp.community.dto;
+package kakao_tech_bootcamp.community.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

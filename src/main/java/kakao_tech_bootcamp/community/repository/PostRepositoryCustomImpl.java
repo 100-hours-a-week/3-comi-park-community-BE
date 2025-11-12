@@ -5,10 +5,10 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import kakao_tech_bootcamp.community.dto.PostAllResponseDto;
-import kakao_tech_bootcamp.community.dto.QPostAllResponseDto;
-import kakao_tech_bootcamp.community.dto.QMemberReferenceDto;
-import kakao_tech_bootcamp.community.dto.QImageResponseDto;
+import kakao_tech_bootcamp.community.dto.response.PostAllResponseDto;
+import kakao_tech_bootcamp.community.dto.response.basic.QImageDto;
+import kakao_tech_bootcamp.community.dto.response.QPostAllResponseDto;
+import kakao_tech_bootcamp.community.dto.response.QMemberReferenceDto;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -42,7 +42,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                                 new QMemberReferenceDto(
                                         member.id,
                                         member.nickname,
-                                        new QImageResponseDto(
+                                        new QImageDto(
                                                 image.id,
                                                 image.objectKey,
                                                 image.filename
@@ -61,7 +61,7 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .where(post.isDeleted.eq(false)
                         .and(lastPostId == null ? null : post.id.lt(lastPostId)))
                 .orderBy(post.id.desc())
-                .limit(limit);
+                .limit(limit + 1);
 
         return query.fetch();
     }
