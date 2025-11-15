@@ -54,14 +54,15 @@ public class MemberService {
             throw new CustomException(MemberExceptionCode.DUPLICATED_NICKNAME);
         }
 
-        Image image = new Image(
-                dto.getImage().getFilename(),
-                dto.getImage().getObjectKey(),
-                dto.getImage().getUrl()
-        );
+        Image image = null;
+
+        if (dto.getImage() != null) {
+            image = new Image(dto.getImage().getFilename(), dto.getImage().getObjectKey(), dto.getImage().getUrl());
+            imageRepository.save(image);
+        }
 
         String encoded = passwordEncoder.encode(dto.getPassword());
-        Member member = new Member(dto.getEmail(), encoded, dto.getNickname(), imageRepository.save(image));
+        Member member = new Member(dto.getEmail(), encoded, dto.getNickname(), image);
 
         return MemberResponseDto.of(memberRepository.save(member));
     }

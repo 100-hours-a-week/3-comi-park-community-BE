@@ -35,14 +35,16 @@ public class PostService {
     public PostResponseDto savePost(Integer currentMemberId, PostCreateRequestDto dto) {
         Member member = memberRepository.findById(currentMemberId)
                 .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
-        Image image = new Image(
-                dto.getImage().getFilename(),
-                dto.getImage().getObjectKey(),
-                dto.getImage().getUrl()
-        );
+
+        Image image = null;
+
+        if (dto.getImage() != null) {
+            image = new Image(dto.getImage().getFilename(), dto.getImage().getObjectKey(), dto.getImage().getUrl());
+            imageRepository.save(image);
+        }
 
         // 바로 flush 해야 참조 무결성 유지
-        Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, imageRepository.save(image)));
+        Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, image));
         postStatService.savePostStat(savePost); // 지연 쓰기로 인해 log 모두 출력 후 post_stat insert (flush) 실행
 
         return PostResponseDto.of(savePost);
