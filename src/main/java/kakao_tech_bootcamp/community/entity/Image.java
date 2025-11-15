@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -23,25 +22,19 @@ public class Image {
     @Column(nullable = false)
     private String filename;
 
-    @Column(name="object_key", length = 1024, nullable = false)
+    @Column(name = "object_key", length = 1024, nullable = false)
     private String objectKey;
 
-    @Column(nullable = false)
-    @ColumnDefault("0")
-    @Enumerated(EnumType.ORDINAL)
-    private ImageStatus status;
+    @Column(name = "url", length = 1024, nullable = false)
+    private String url;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public Image(String filename, String objectKey, ImageStatus status) {
+    public Image(String filename, String objectKey, String url) {
         this.filename = filename;
         this.objectKey = objectKey;
-        this.status = status;
-    }
-
-    public void changeStatus(ImageStatus imageStatus) {
-        this.status = imageStatus;
+        this.url = url;
     }
 }

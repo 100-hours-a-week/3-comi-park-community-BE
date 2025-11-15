@@ -5,7 +5,6 @@ import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.ImageExceptionCode;
 import kakao_tech_bootcamp.community.dto.response.ImageResponseDto;
 import kakao_tech_bootcamp.community.entity.Image;
-import kakao_tech_bootcamp.community.entity.ImageStatus;
 import kakao_tech_bootcamp.community.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,25 +30,16 @@ public class ImageService {
 
     public ImageResponseDto saveImage(String type, MultipartFile file) throws IOException{
         String filename = file.getOriginalFilename();
-
         String objectKey = createObjectKey(type, filename);
-        Image image = new Image(filename, objectKey, ImageStatus.PENDING);
-        Image saveImage = imageRepository.save(image);
 
         String filepath = StorageProperties.createFilepath(objectKey);
         File destination = new File(filepath);
         destination.getParentFile().mkdirs();
         file.transferTo(destination);
 
-        return ImageResponseDto.of(image);
-    }
+        Image image = new Image(filename, objectKey, StorageProperties.getStaticBaseUrl() + objectKey);
 
-    public Image modifyImageStatusById(Integer imageId, ImageStatus imageStatus) {
-        Image image = imageRepository.findById(imageId)
-                .orElseThrow(() -> new CustomException(ImageExceptionCode.NOT_FOUND));
-        image.changeStatus(imageStatus);
-        // TODO: 엔티티 말고 dto를 반환할 방법?
-        return image;
+        return ImageResponseDto.of(image);
     }
 
     public void removeImage(Integer imageId, String objectKey) {

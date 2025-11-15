@@ -6,4 +6,6 @@ import lombok.Getter;
 public class ImageRequestDto {
     private Integer id;
     private String objectKey;
+    private String filename;
+    private String url;
 }

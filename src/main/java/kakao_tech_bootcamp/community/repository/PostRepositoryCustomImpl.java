@@ -45,7 +45,8 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                                         new QImageDto(
                                                 image.id,
                                                 image.objectKey,
-                                                image.filename
+                                                image.filename,
+                                                image.url
                                         )
                                 ),
                                 isLikedExpression,
