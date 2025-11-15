@@ -2,10 +2,8 @@ spring:
   config:
     import: application-secret.yml
 
-  ### 정적 파일 경로 설정
   mvc:
     servlet.path: /api
-    static-path-pattern: /static/**
 
   ### JPA 설정
   jpa:
