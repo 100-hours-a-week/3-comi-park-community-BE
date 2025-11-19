@@ -29,18 +29,22 @@ public class PostService {
     private final PostRepository postRepository;
     private final MemberPostLikeRepository memberPostLikeRepository;
     private final MemberRepository memberRepository;
-    private final ImageService imageService;
+    private final ImageRepository imageRepository;
     private final PostStatService postStatService;
 
     public PostResponseDto savePost(Integer currentMemberId, PostCreateRequestDto dto) {
         Member member = memberRepository.findById(currentMemberId)
                 .orElseThrow(() -> new CustomException(MemberExceptionCode.NOT_FOUND));
 
-        Image image = dto.getImage() != null
-                ? imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE)
-                : null;
+        Image image = null;
 
-        Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, image)); // 바로 flush 해야 참조 무결성 유지
+        if (dto.getImage() != null) {
+            image = new Image(dto.getImage().getFilename(), dto.getImage().getObjectKey(), dto.getImage().getUrl());
+            imageRepository.save(image);
+        }
+
+        // 바로 flush 해야 참조 무결성 유지
+        Post savePost = postRepository.save(new Post(dto.getTitle(), dto.getContent(), member, image));
         postStatService.savePostStat(savePost); // 지연 쓰기로 인해 log 모두 출력 후 post_stat insert (flush) 실행
 
         return PostResponseDto.of(savePost);
@@ -114,20 +118,27 @@ public class PostService {
         if (dto.getImageDeleted() && dto.getImage() == null && post.getImage() != null) {
             Image previousImage = post.getImage();
             post.changeImage(null);
-            imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+
+            // TODO: 이미지 객체 삭제 구현 (S3, 멀티파트 동시 지원하도록)
+//            imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
 
             changedResponseDto.add("image", ImageDto.of(post.getImage()));
         }
 
         if (dto.getImage() != null) {
             Image previousImage = post.getImage();
+            Image image = new Image(
+                    dto.getImage().getFilename(),
+                    dto.getImage().getObjectKey(),
+                    dto.getImage().getUrl()
+            );
 
-            Image currentImage = imageService.modifyImageStatusById(dto.getImage().getId(), ImageStatus.ACTIVE);
-            post.changeImage(currentImage);
+            post.changeImage(imageRepository.save(image));
 
-            if (previousImage != null) {
-                imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
-            }
+            // TODO: 이미지 객체 삭제 구현 (S3, 멀티파트 동시 지원하도록)
+//            if (previousImage != null) {
+//                imageService.removeImage(previousImage.getId(), previousImage.getObjectKey());
+//            }
 
             changedResponseDto.add("image", ImageDto.of(post.getImage()));
         }

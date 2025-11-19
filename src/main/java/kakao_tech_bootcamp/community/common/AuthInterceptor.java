@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.MemberExceptionCode;
+import kakao_tech_bootcamp.community.config.PublicEndpointProperties;
 import kakao_tech_bootcamp.community.dto.response.AuthResponseDto;
 import kakao_tech_bootcamp.community.service.AuthInfo;
 import kakao_tech_bootcamp.community.service.AuthJwtService;
@@ -14,18 +15,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
-    private static final Map<String, String> PUBLIC_ENDPOINT = Map.of(
-            "/api/members", "POST",
-            "/api/members/availability/email", "POST",
-            "/api/members/availability/nickname", "POST",
-            "/api/images/members", "POST"
-    );
+    private final PublicEndpointProperties properties;
     private final AuthSessionService authSessionService;
     private final AuthJwtService authJwtService;
 
@@ -38,8 +33,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        if (PUBLIC_ENDPOINT.containsKey(uri) && PUBLIC_ENDPOINT.get(uri).equals(method)) {
-            return true;
+        for (PublicEndpointProperties.EndPoint endPoint : properties.getPublicEndpoints()) {
+            if (endPoint.getPath().equals(uri) && endPoint.getMethod().equals(method)) {
+                return true;
+            }
         }
 
         AuthResponseDto authInfo = extractCredential(request, "sid")

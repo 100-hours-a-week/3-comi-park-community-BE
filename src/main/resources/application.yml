@@ -2,10 +2,8 @@ spring:
   config:
     import: application-secret.yml
 
-  ### 정적 파일 경로 설정
   mvc:
     servlet.path: /api
-    static-path-pattern: /static/**
 
   ### JPA 설정
   jpa:
@@ -28,6 +26,19 @@ logging:
     org.hibernate.SQL: debug
 
 ### 값 설정
+app:
+  public-endpoints:
+    - path: /api/health
+      method: GET
+    - path: /api/members
+      method: POST
+    - path: /api/members/availability/email
+      method: POST
+    - path: /api/members/availability/nickname
+      method: POST
+    - path: /api/images/members
+      method: POST
+
 # JWT
 jwt:
   access-token:
