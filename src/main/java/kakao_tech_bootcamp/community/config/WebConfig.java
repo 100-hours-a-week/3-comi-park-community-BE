@@ -2,8 +2,8 @@ package kakao_tech_bootcamp.community.config;
 
 import kakao_tech_bootcamp.community.common.AuthInterceptor;
 import kakao_tech_bootcamp.community.common.CurrentMemberResolver;
-import kakao_tech_bootcamp.community.common.StorageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -17,6 +17,9 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
     private final AuthInterceptor authInterceptor;
     private final CurrentMemberResolver currentMemberResolver;
+
+    @Value("${storage.local-path}")
+    private String localPath;
 
     @Autowired
     public WebConfig(AuthInterceptor authInterceptor, CurrentMemberResolver currentMemberResolver) {
@@ -44,6 +47,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(File.separator + "s3" + File.separator + "**")
-                .addResourceLocations("file:" + StorageProperties.getLocalStoragePath());
+                .addResourceLocations("file:" + localPath);
     }
 }
