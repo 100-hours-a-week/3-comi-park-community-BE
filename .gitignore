@@ -41,3 +41,4 @@ application-dev.yml
 application-prod.yml
 
 s3/
+.env*
