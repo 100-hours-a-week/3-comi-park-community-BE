@@ -42,9 +42,12 @@ app:
     - path: /api/images
       method: POST
 
+# Storage
 storage:
-  local_storage_path: ${LOCAL_STORAGE_PATH}
-  static-base-url: ${STATIC_BASE_URL}
+  local-path: ${IMAGE_LOCAL_PATH}
+  base-url: ${IMAGE_BASE_URL}
+
+allowed-image-extensions: png, jpg, jpeg, webp, heic, heif
 
 # JWT
 jwt:
