@@ -1,9 +1,12 @@
 spring:
-  config:
-    import: application-secret.yml
-
   mvc:
     servlet.path: /api
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   ### JPA 설정
   jpa:
@@ -36,11 +39,17 @@ app:
       method: POST
     - path: /api/members/availability/nickname
       method: POST
-    - path: /api/images/members
+    - path: /api/images
       method: POST
+
+storage:
+  local_storage_path: ${LOCAL_STORAGE_PATH}
+  static-base-url: ${STATIC_BASE_URL}
 
 # JWT
 jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  issuer: ${JWT_ISSUER}
   access-token:
     key: accessToken
     path: /
@@ -66,3 +75,7 @@ cookie:
   http-only: true
   same-site: LAX
   secure: false
+
+# CORS
+cors:
+  allow-origins: http://localhost:3000, https://www.kbt-comi.store, https://kbt-comi.store
