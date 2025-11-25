@@ -20,16 +20,11 @@ import java.io.IOException;
 public class ImageController {
     private final ImageService imageService;
 
-    @PostMapping("/members")
-    public ResponseEntity<CommonResponse<BaseResponse>> saveMemberImage(@RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping()
+    public ResponseEntity<CommonResponse<BaseResponse>> saveMemberImage(@CurrentMember AuthInfo authInfo,
+                                                                        @RequestParam("type") String type,
+                                                                        @RequestParam("file") MultipartFile file) throws IOException {
         ImageResponseDto imageResponseDto = imageService.saveImage("members", file);
         return ResponseFactory.created(imageResponseDto);
-    }
-
-    @PostMapping("/posts")
-    public ResponseEntity<CommonResponse<BaseResponse>> savePostImage(@CurrentMember AuthInfo authInfo,
-                                                                                    @RequestParam("file") MultipartFile file) throws IOException {
-        ImageResponseDto imageResponseDto = imageService.saveImage("posts", file);
-        return ResponseFactory.ok(imageResponseDto);
     }
 }
