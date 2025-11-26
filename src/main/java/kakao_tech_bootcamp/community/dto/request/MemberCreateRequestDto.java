@@ -5,8 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class MemberCreateRequestDto {
     @Email(message = "이메일 형식이 유효하지 않습니다")
     @Size(max = 50, message = "이메일 형식이 유효하지 않습니다")

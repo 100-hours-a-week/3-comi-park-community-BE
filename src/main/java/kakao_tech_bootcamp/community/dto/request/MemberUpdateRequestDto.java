@@ -3,8 +3,12 @@ package kakao_tech_bootcamp.community.dto.request;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class MemberUpdateRequestDto {
     @Pattern(regexp = "^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[~.!@#$%^&*()_\\-+=\\[\\]{}|\\\\;:'\",?/]).{8,20}$", message = "비밀번호 형식이 유효하지 않습니다")
     private String password;
