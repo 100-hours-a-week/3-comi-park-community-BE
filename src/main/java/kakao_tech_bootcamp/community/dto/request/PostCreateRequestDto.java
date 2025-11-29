@@ -3,8 +3,12 @@ package kakao_tech_bootcamp.community.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class PostCreateRequestDto {
     @NotBlank(message = "제목 형식이 유효하지 않습니다")
     @Size(max = 26, message = "제목 형식이 유효하지 않습니다")

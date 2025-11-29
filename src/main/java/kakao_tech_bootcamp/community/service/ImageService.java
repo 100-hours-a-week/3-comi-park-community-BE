@@ -2,7 +2,6 @@ package kakao_tech_bootcamp.community.service;
 
 import kakao_tech_bootcamp.community.common.exceptions.CustomException;
 import kakao_tech_bootcamp.community.common.exceptions.code.ImageExceptionCode;
-import kakao_tech_bootcamp.community.controller.ImageUploadRequest;
 import kakao_tech_bootcamp.community.dto.response.ImageResponseDto;
 import kakao_tech_bootcamp.community.entity.Image;
 import kakao_tech_bootcamp.community.repository.ImageRepository;
@@ -22,7 +21,7 @@ import java.io.IOException;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class LocalImageService implements ImageStorageStrategy {
+public class ImageService {
     private final ImageRepository imageRepository;
     private final ObjectKeyFactory objectKeyFactory;
 
@@ -31,10 +30,7 @@ public class LocalImageService implements ImageStorageStrategy {
     @Value("${storage.base-url}")
     private String baseUrl;
 
-    @Override
-    public ImageResponseDto saveImage(ImageCategory category, ImageUploadRequest uploadRequest) {
-        MultipartFile file = uploadRequest.getFile();
-
+    public ImageResponseDto saveImage(ImageCategory category, MultipartFile file) {
         String filename = file.getOriginalFilename();
         String objectKey = objectKeyFactory.create(category, filename);
 
@@ -54,18 +50,12 @@ public class LocalImageService implements ImageStorageStrategy {
         return ImageResponseDto.of(image);
     }
 
-    @Override
     public void removeImage(Integer imageId, String objectKey) {
         imageRepository.deleteById(imageId);
 
         String filepath = createFilepath(objectKey);
         File destination = new File(filepath);
         destination.delete(); // 물리적 이미지 파일 없거나 삭제 실패해도 오류 X
-    }
-
-    @Override
-    public ImageStorage getImageStorage() {
-        return ImageStorage.LOCAL;
     }
 
     private String createFilepath(String objectKey) {
