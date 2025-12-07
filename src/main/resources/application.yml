@@ -81,4 +81,4 @@ cookie:
 
 # CORS
 cors:
-  allow-origins: http://localhost:3000, https://www.kbt-comi.store, https://kbt-comi.store
+  allow-origins: http://localhost:3000, https://www.co-mi.store, https://co-mi.store
