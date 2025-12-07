@@ -145,13 +145,13 @@ jobs:
       - name: Deploy to EC2 via SSM
         run: |
           aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --targets "Key=tag:App,Values=ktb-spring-01" \
             --document-name "AWS-RunShellScript" \
             --parameters '{
               "commands": [
                 "cd /home/ubuntu",
                 "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY_URL }}",
-                "docker compose -f docker-compose.yml pull spring",
-                "docker compose -f docker-compose.yml up -d spring"
+                "docker compose pull",
+                "docker compose up -d --remove-orphans"
               ]
             }'
