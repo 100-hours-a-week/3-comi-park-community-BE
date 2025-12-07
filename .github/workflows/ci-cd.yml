@@ -89,7 +89,7 @@ jobs:
             echo "ℹ️ Previous latest is now tagged as $IMAGE_TAG"
           fi
 
-      # 3) 도커 이미지 빌드
+      # 3) 최신 도커 이미지(latest) 빌드
       - name: Build Docker Image
         run: |
           docker build -t "${IMAGE_URL}:latest" . || { echo "❌ Docker build FAILED"; exit 1; }
@@ -100,12 +100,10 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 5) ECR에 도커 이미지 푸시
+      # 5) ECR에 최신 도커 이미지(latest) 푸시
       - name: Push Docker Image
-        # 가장 최신 버전(latest)과 바로 직전 버전(Sha Tag) Push
         run: |
           docker push "${IMAGE_URL}:latest" || { echo "❌ latest Docker push FAILED"; exit 1; }
-          docker push "${IMAGE_URL}:${IMAGE_TAG}" || { echo "❌ sha-tag Docker push FAILED"; exit 1; }
           echo "🎉 Docker push successful"
 
       # 6) 최신 버전과 직전 버전 제외한 이미지 삭제
