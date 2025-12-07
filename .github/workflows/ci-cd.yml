@@ -5,6 +5,10 @@ on:
     branches:
       - develop
 
+permissions:
+  id-token: write # OIDC 토큰 발급 허용
+  contents: read  # actions/checkout용
+
 jobs:
   test:
     name: Run tests
@@ -38,10 +42,6 @@ jobs:
     name: Docker build & push
     runs-on: ubuntu-latest
     needs: test # test Job 성공 시 진행
-
-    permissions:
-      id-token: write # OIDC 토큰 발급 허용
-      contents: read  # actions/checkout용
 
     env:
       IMAGE_TAG: sha-${{ github.sha }}
