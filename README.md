@@ -113,7 +113,7 @@
 
 > 목표: 100만 MAU까지 확장 가능한 구조
 
-<img width="7920" height="4120" alt="image" src="https://github.com/user-attachments/assets/4d02cbe7-fecb-4c36-a9e4-10287ae4300d" />
+<img width="1960" height="1010" alt="comi park(박경미)-gossip-girl-아키텍처" src="https://github.com/user-attachments/assets/bb89a594-cdb4-4b5d-8a02-643afe138b5f" />
 
 <br>
 
@@ -126,16 +126,6 @@
 <br>
 
 ### 상세 설계
-
-- `Private Subnet 접근 방법 ⇒ SSM`
-    - Self-hosted Runner와 SSM - NAT Gateway는 비용, SSH는 보안, 키 관리, 속도 때문에 제외
-    - 단기적으로 가격은 VPC Endpoint가 필요한 SSM보단 EC2 Micro를 사용하는 Self-hosted Runner 방식이 더 저렴하지만
-    - SSM은 - 높은 보안성 - SSH (22) 포트 없음 → 보안 그룹 인바운드 없음 → 공격 표면 없음
-    - 즉, 외부에서 Private Subnet로의 접근 방법 존재 X - 확장성 (관리 용이성) - 서버 수가 증가해도 관리 포인트 증가 X
-    - 키가 아니라 IAM 기반 접근 제어 - 키 기반이라면 EC2마다 서로 다른 키 생성 및 관리 - ECS로의 확장과 CodeDeploy 등 다른 AWS 서비스와의 연동에 용이
-    - 따라서 100만 MAU까지 유지 가능한 구조 설계를 목표로 관리 용이성, 보안, 확장성을 고려해 SSM 최종 선택
-
-<br>
 
 - `도커 이미지 레지스트리 ⇒ 개발 시엔 Portainer Private Registry, 배포 시엔 ECR`
     - 원하는 조건
