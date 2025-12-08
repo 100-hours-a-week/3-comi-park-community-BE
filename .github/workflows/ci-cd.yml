@@ -118,16 +118,17 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --targets "Key=tag:App,Values=ktb-spring-01" \
             --document-name "AWS-RunShellScript" \
-            --parameters '{
-              "commands": [
-                "cd /home/ubuntu",
-                "echo IMAGE_URL=${IMAGE_URL} > .env.deploy",
-                "echo IMAGE_TAG=${IMAGE_TAG} >> .env.deploy",
-                "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY_URL }}",
-                "sudo IMAGE_URL=${IMAGE_URL} IMAGE_TAG=${IMAGE_TAG} docker compose pull >> deploy.log 2>&1",
-                "sudo IMAGE_URL=${IMAGE_URL} IMAGE_TAG=${IMAGE_TAG} docker compose up -d --remove-orphans >> deploy.log 2>&1"
+            --parameters "{
+              \"commands\": [
+                \"cd /home/ubuntu\",
+                \"echo IMAGE_URL=${IMAGE_URL} > .env.deploy\",
+                \"echo IMAGE_TAG=${IMAGE_TAG} >> .env.deploy\",
+                \"export \$(cat .env.deploy | xargs)\",
+                \"aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY_URL }}\",
+                \"sudo IMAGE_URL=${IMAGE_URL} IMAGE_TAG=${IMAGE_TAG} docker compose pull >> deploy.log 2>&1\",
+                \"sudo IMAGE_URL=${IMAGE_URL} IMAGE_TAG=${IMAGE_TAG} docker compose up -d --remove-orphans >> deploy.log 2>&1\"
               ]
-            }' \
+            }" \
             --query "Command.CommandId" \
             --output text)
                     
