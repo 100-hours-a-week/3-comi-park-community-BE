@@ -1,6 +1,6 @@
 services:
   spring:
-    image: ${IMAGE_URL}/ktb-01:${IMAGE_TAG}
+    image: ${IMAGE_URL}:${IMAGE_TAG}
     ports:
       - "8080:8080"
     container_name: spring-container
