@@ -155,13 +155,13 @@ jobs:
           aws ssm send-command \
             --targets "Key=tag:App,Values=ktb-spring-01" \
             --document-name "AWS-RunShellScript" \
-            --parameters '{
-              "commands": [
-                "cd /home/ubuntu",
-                "IMAGE_IDS=($(docker images --format '{{.Repository}} {{.Tag}} {{.ID}}' | grep '${{ secrets.AWS_ECR_REPOSITORY_NAME }}' | sort -k2 -r | awk \'{print $3}\'))",
-                "echo Total Images: ${#IMAGE_IDS[@]}",
-                "for ((i=2; i<${#IMAGE_IDS[@]}; i++)); do ID=${IMAGE_IDS[i]}; echo '🔥 Deleting image:' $ID; sudo docker rmi -f $ID || true; done",
-                "echo '🚀 Cleanup Completed'"
+            --parameters "{
+              \"commands\": [
+                \"cd /home/ubuntu\",
+                \"IMAGE_IDS=(\\$(docker images --format '{{.Repository}} {{.Tag}} {{.ID}}' | grep '${{ secrets.AWS_ECR_REPOSITORY_NAME }}' | sort -k2 -r | awk '{print \\\\\\$3}'))\",
+                \"echo Total Images: \\\\\${#IMAGE_IDS[@]}\",
+                \"for ((i=2; i<\\\\${#IMAGE_IDS[@]}; i++)); do ID=\\\\${IMAGE_IDS[\\\\$i]}; echo '🔥 Deleting image:' \\\\\$ID; sudo docker rmi -f \\\\\$ID || true; done\",
+                \"echo '🚀 Cleanup Completed'\"
               ]
-            }' \
+            }" \
             --output text
