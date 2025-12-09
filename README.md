@@ -115,7 +115,7 @@ https://github.com/user-attachments/assets/54b18e8c-7624-4d55-98f8-522400c61271
 
 > 목표: 100만 MAU까지 확장 가능한 구조
 
-<img width="1960" height="1010" alt="comi park(박경미)-gossip-girl-아키텍처" src="https://github.com/user-attachments/assets/bb89a594-cdb4-4b5d-8a02-643afe138b5f" />
+<img width="1960" height="1010" alt="comi park(박경미)-gossip-girl-아키텍처-v3" src="https://github.com/user-attachments/assets/b23f051f-02fe-4993-b025-7c095aed8b7f" />
 
 <br>
 
