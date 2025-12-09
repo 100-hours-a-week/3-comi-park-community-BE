@@ -35,9 +35,11 @@
 
 ### 시연 영상
 
-> https://youtu.be/DljeHMnJPa8 유튜브 링크입니다
+> https://youtu.be/DljeHMnJPa8 유튜브에서 고화질로 확인할 수 있습니다
 
-[![Video Label](http://img.youtube.com/vi/DljeHMnJPa8/sddefault.jpg)](https://youtu.be/DljeHMnJPa8)
+https://github.com/user-attachments/assets/54b18e8c-7624-4d55-98f8-522400c61271
+
+
 
 - 회원가입을 해야만 이용할 수 있습니다
 - 회원은 게시글당 1장 이하의 이미지를 첨부할 수 있습니다
